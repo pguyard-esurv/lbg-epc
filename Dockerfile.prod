@@ -1,0 +1,64 @@
+###########
+# BUILDER #
+###########
+
+# Build the React front end.
+FROM node:16-alpine as build-client
+
+# set work directory
+RUN mkdir /app
+WORKDIR /app
+
+ENV PATH /app/node_modules/.bin:$PATH
+
+COPY ./client .
+
+RUN yarn install
+RUN yarn build
+
+# Build pip requirements.
+FROM python:3.9.7-slim-buster as build-reqs
+
+# set work directory
+WORKDIR /app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install dependencies
+COPY ./api/requirements.txt requirements.txt
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+
+#########
+# FINAL #
+#########
+
+FROM python:3.9.7-slim-buster
+
+RUN mkdir /app
+WORKDIR /app
+
+# create the appropriate directories
+RUN mkdir /app/staticfiles
+
+# install dependencies
+COPY --from=build-reqs /app/wheels /wheels
+COPY --from=build-reqs /app/requirements.txt requirements.txt
+RUN pip install --no-cache /wheels/*
+
+# install ODBC driver
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+# copy client build files
+COPY --from=build-client /app/build staticfiles/
+
+# copy api files
+COPY ./api .
+
+CMD ["gunicorn", "-b", ":8000", "api:app"]
