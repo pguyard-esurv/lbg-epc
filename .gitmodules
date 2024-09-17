@@ -1,0 +1,3 @@
+[submodule "api/esurv_db_manager"]
+	path = api/esurv_db_manager
+	url = https://github.com/esurv/esurv_db_manager/
