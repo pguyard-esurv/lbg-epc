@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import './index.css';  // Ensure your Tailwind styles are being imported
+import './index.css';
 
-function FormCard() {
+function FormCard({ onFormSubmit }) {
   const [formData, setFormData] = useState({
     fullName: '',
     telephone: '',
@@ -11,23 +11,56 @@ function FormCard() {
     agreeToPrivacy: false,
   });
 
+  const [formErrors, setFormErrors] = useState({});
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
-    setFormData(function (prevData) {
-      return {
-        ...prevData,
-        [name]: type === 'checkbox' ? checked : value,
-      };
-    });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: '',
+    }));
+  }
+
+  function validateForm() {
+    const errors = {};
+    if (!formData.fullName.trim()) {
+      errors.fullName = 'Full Name is required.';
+    }
+    if (!formData.telephone.trim()) {
+      errors.telephone = 'Telephone Number is required.';
+    }
+    if (!formData.email.trim()) {
+      errors.email = 'Email Address is required.';
+    }
+    if (!formData.customerRoll.trim()) {
+      errors.customerRoll = 'Customer Roll Number is required.';
+    }
+    if (!formData.address.trim()) {
+      errors.address = 'Address is required.';
+    }
+    if (!formData.agreeToPrivacy) {
+      errors.agreeToPrivacy = 'You need to accept the privacy terms.';
+    }
+    return errors;
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log(formData);  // Process form data here
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors); // Set errors if validation fails
+      return;
+    }
+    console.log(formData);
+    onFormSubmit();
   }
 
   return (
-    <div className="bg-primary-dark text-white p-7 rounded-lg max-w-6xl mx-auto mt-6 m-2">
+    <div className="bg-primary-dark text-white p-7 rounded-lg max-w-6xl mx-auto mt-2 m-2">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Personal Information Column */}
@@ -40,8 +73,9 @@ function FormCard() {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                className={`w-full p-2 rounded border ${formErrors.fullName ? 'border-red-500' : 'border-white'} bg-primary-dark text-white placeholder-gray-400`}
               />
+              {formErrors.fullName && <p className="text-red-500 text-sm">{formErrors.fullName}</p>}
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Telephone Number</label>
@@ -50,8 +84,9 @@ function FormCard() {
                 name="telephone"
                 value={formData.telephone}
                 onChange={handleChange}
-                className="w-full p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                className={`w-full p-2 rounded border ${formErrors.telephone ? 'border-red-500' : 'border-white'} bg-primary-dark text-white placeholder-gray-400`}
               />
+              {formErrors.telephone && <p className="text-red-500 text-sm">{formErrors.telephone}</p>}
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Email Address</label>
@@ -60,8 +95,9 @@ function FormCard() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                className={`w-full p-2 rounded border ${formErrors.email ? 'border-red-500' : 'border-white'} bg-primary-dark text-white placeholder-gray-400`}
               />
+              {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email}</p>}
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Customer Roll Number</label>
@@ -70,10 +106,13 @@ function FormCard() {
                 name="customerRoll"
                 value={formData.customerRoll}
                 onChange={handleChange}
-                className="w-full p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                className={`w-full p-2 rounded border ${formErrors.customerRoll ? 'border-red-500' : 'border-white'} bg-primary-dark text-white placeholder-gray-400`}
                 placeholder="Enter customer roll number"
               />
-              <p className="text-xs text-gray-400 mt-1">This will be a 12-digit number, starting with either 1 for Halifax and 4 for Lloyds</p>
+              {formErrors.customerRoll && <p className="text-red-500 text-sm">{formErrors.customerRoll}</p>}
+              <p className="text-xs text-gray-400 mt-1">
+                This will be a 12-digit number, starting with either 1 for Halifax and 4 for Lloyds
+              </p>
             </div>
           </div>
 
@@ -88,7 +127,7 @@ function FormCard() {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full p-2 rounded-l border border-white bg-primary-dark text-white placeholder-gray-400"
+                  className={`w-full p-2 rounded-l border ${formErrors.address ? 'border-red-500' : 'border-white'} bg-primary-dark text-white placeholder-gray-400`}
                 />
                 <button
                   type="button"
@@ -97,6 +136,7 @@ function FormCard() {
                   Search
                 </button>
               </div>
+              {formErrors.address && <p className="text-red-500 text-sm">{formErrors.address}</p>}
             </div>
             <div className="mb-4 flex items-center">
               <input
@@ -114,13 +154,25 @@ function FormCard() {
               >
                 {formData.agreeToPrivacy && <div className="w-2 h-2 rounded-full bg-white"></div>}
               </label>
-              <label className="ml-2 text-sm font-medium">I agree to the <a href='' className="underline">Privacy Notice</a></label>
+              <label className="ml-2 text-sm font-medium">
+                I agree to the{' '}
+                <a
+                  href="https://www.esurv.co.uk/privacy-notice/"
+                  target="_blank"
+                  className="underline"
+                >
+                  Privacy Notice
+                </a>
+              </label>
             </div>
+            {formErrors.agreeToPrivacy && (
+              <p className="text-red-500 text-sm">{formErrors.agreeToPrivacy}</p>
+            )}
           </div>
         </div>
 
         {/* Submit Button */}
-        <div className="text-right ">
+        <div className="text-right">
           <button
             type="submit"
             className="bg-secondary-pink text-white px-6 py-1 rounded-full"
@@ -134,4 +186,3 @@ function FormCard() {
 }
 
 export default FormCard;
-

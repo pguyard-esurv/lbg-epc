@@ -9,7 +9,6 @@ function InfoCard() {
 
   return (
     <div className="max-w-6xl mx-auto mt-2 text-black font-sans">
-      {/* Title line with responsive flexbox behavior */}
       <div className="flex flex-col md:flex-row justify-between md:items-baseline">
         <h1 className="text-2xl font-bold">{titleLeft}</h1>
         <a 
@@ -23,7 +22,6 @@ function InfoCard() {
         </a>
       </div>
 
-      {/* Middle font text below the title */}
       <div className="mt-2">
         <p className="text-base">
           {descriptionPart1}
