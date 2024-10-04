@@ -12,6 +12,8 @@ function FormCard() {
     agreeToPrivacy: false,
   });
 
+  const [postcodeError, setPostcodeError] = useState(false);
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setFormData(function (prevData) {
@@ -33,8 +35,14 @@ function FormCard() {
     console.log(valid);
 
     if(!valid){
-      console.log('invalid address/postcode; unable to parse')
+      console.log('invalid address/postcode; unable to parse');
+      setPostcodeError(true);
+      return;
     }
+
+    // Proceed with parsing or other logic if the postcode is valid
+    const parsedAddress = parse(formData.address);
+    console.log(parsedAddress);
   }
 
   return (
@@ -110,6 +118,7 @@ function FormCard() {
                   Search
                 </button>
               </div>
+              {postcodeError && <p className="text-red-500 mt-2">Invalid postcode. Please enter a valid postcode.</p>}
             </div>
             <div className="mb-4 flex items-center">
               <input
