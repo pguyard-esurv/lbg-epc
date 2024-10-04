@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './index.css';  // Ensure your Tailwind styles are being imported
+import './FormCard.css';
 import {isValid} from 'postcode';
 
 function FormCard() {
@@ -107,7 +108,7 @@ function FormCard() {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full p-2 rounded-l border border-white bg-primary-dark text-white placeholder-gray-400"
+                  className={"w-full p-2 rounded-l ${postcodeError ? 'input-border-error' : 'input-border'} bg-primary-dark text-white placeholder-gray-400"}
                 />
                 <button
                   type="button"
