@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './index.css';  // Ensure your Tailwind styles are being imported
+import {isValid} from 'postcode';
 
 function FormCard() {
   const [formData, setFormData] = useState({
@@ -24,6 +25,16 @@ function FormCard() {
   function handleSubmit(e) {
     e.preventDefault();
     console.log(formData);  // Process form data here
+  }
+
+  function searchAddress() {
+    // console.log(parse(formData.address))
+    const valid = isValid(formData.address);
+    console.log(valid);
+
+    if(!valid){
+      console.log('invalid address/postcode; unable to parse')
+    }
   }
 
   return (
