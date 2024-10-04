@@ -93,6 +93,8 @@ function FormCard() {
                 <button
                   type="button"
                   className="bg-white text-primary-dark p-2 rounded-r border border-white"
+                  onClick={searchAddress}
+                  disabled={formData.address==''}
                 >
                   Search
                 </button>
