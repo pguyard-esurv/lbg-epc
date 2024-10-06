@@ -1,9 +1,8 @@
 import React from 'react';
 import './index.css';
 import Header from './Header.js';
-import InfoCard from './InfoCard.js';
-import FormCard from './FormCard.js';
 import Footer from './Footer.js';
+import InputCard from './InputCard.js';
 
 function App() {
   return (
@@ -11,8 +10,7 @@ function App() {
       <Header />
       <main className="flex-grow">
         <div className="container mx-auto p-4">
-          <InfoCard />
-          <FormCard />
+          <InputCard />
         </div>
       </main>
       <Footer />
