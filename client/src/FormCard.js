@@ -52,11 +52,11 @@ function FormCard({ onFormSubmit }) {
     e.preventDefault();
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors); // Set errors if validation fails
+      setFormErrors(errors);
       return;
     }
-    console.log(formData);
-    onFormSubmit();
+    
+    onFormSubmit(formData);
   }
 
   return (
