@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './index.css';
+import './FormCard.css';
+import {isValid} from 'postcode';
 
 function FormCard({ onFormSubmit }) {
   const [formData, setFormData] = useState({
@@ -11,6 +13,7 @@ function FormCard({ onFormSubmit }) {
     agreeToPrivacy: false,
   });
 
+  const [postcodeError, setPostcodeError] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   function handleChange(e) {
@@ -57,6 +60,22 @@ function FormCard({ onFormSubmit }) {
     }
     
     onFormSubmit(formData);
+  }
+
+  function searchAddress() {
+    // console.log(parse(formData.address))
+    const valid = isValid(formData.address);
+    console.log(valid);
+
+    if(!valid){
+      console.log('invalid address/postcode; unable to parse');
+      setPostcodeError(true);
+      return;
+    }
+
+    // Proceed with parsing or other logic if the postcode is valid
+    const parsedAddress = parse(formData.address);
+    console.log(parsedAddress);
   }
 
   return (
@@ -127,16 +146,18 @@ function FormCard({ onFormSubmit }) {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className={`w-full p-2 rounded-l border ${formErrors.address ? 'border-red-500' : 'border-white'} bg-primary-dark text-white placeholder-gray-400`}
+                  className={"w-full p-2 rounded-l ${postcodeError ? 'input-border-error' : 'input-border'} bg-primary-dark text-white placeholder-gray-400"}
                 />
                 <button
                   type="button"
                   className="bg-white text-primary-dark p-2 rounded-r border border-white"
+                  onClick={searchAddress}
+                  disabled={formData.address==''}
                 >
                   Search
                 </button>
               </div>
-              {formErrors.address && <p className="text-red-500 text-sm">{formErrors.address}</p>}
+              {postcodeError && <p className="text-red-500 mt-2">Invalid postcode. Please enter a valid postcode.</p>}
             </div>
             <div className="mb-4 flex items-center">
               <input
