@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './index.css';
 import './FormCard.css';
-import {isValid} from 'postcode';
+import {isValid, parse} from 'postcode';
 
 function FormCard({ onFormSubmit }) {
   const [formData, setFormData] = useState({
