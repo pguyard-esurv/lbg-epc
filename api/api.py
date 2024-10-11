@@ -33,7 +33,6 @@ def index():
     validity = validate_token(token)
     if validity == 'valid':
         response = make_response(redirect(FRONTEND_URL))
-        #response.set_cookie('jwt', jwt_token)
         return response
     else:
         return 'Invalid Token'
