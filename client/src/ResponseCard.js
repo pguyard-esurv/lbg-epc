@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import ScotlandTerms from './ScotlandTerms';
 import NotScotlandTerms from './NotScotlandTerms';
-import ThankYou from './ThankYou.js'
+import ThankYou from './ThankYou';
 import TermsCardWrapper from './TermsCardWrapper';
 
+// Function to submit response data
+async function submitResponseData(responseData) {
+  const backendUrl = process.env.REACT_APP_BACKEND_URL + '/api/submit-form';
 
-async function submitResponseData(submissionResult) {
-  return {
-    ok: true
-  }
-  const response = await fetch('https://api.example.com/submit', {
+  const response = await fetch(backendUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(submissionResult),
+    body: JSON.stringify(responseData),
   });
 
   return response;
@@ -27,7 +26,7 @@ function ResponseCard({ responseData }) {
   const handleSubmit = async () => {
     setSubmissionStatus('pending');
     try {
-      const response = await submitResponseData(submissionResult);
+      const response = await submitResponseData(responseData);
 
       if (response.ok) {
         setSubmissionStatus('success');
@@ -39,12 +38,13 @@ function ResponseCard({ responseData }) {
     }
   };
 
+
   if (submissionStatus === 'success') {
     return <ThankYou />;
   }
 
-  if (submissionResult.termType) {
-    if (submissionResult.termType === 'scotland') {
+  if (responseData.region) {
+    if (responseData.region === 'Scotland') {
       return (
         <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
           <ScotlandTerms />
@@ -52,7 +52,7 @@ function ResponseCard({ responseData }) {
       );
     }
 
-    if (submissionResult.termType === 'not scotland') {
+    if (responseData.region && responseData.region !== 'Scotland') {
       return (
         <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
           <NotScotlandTerms />
@@ -71,4 +71,3 @@ function ResponseCard({ responseData }) {
 }
 
 export default ResponseCard;
-

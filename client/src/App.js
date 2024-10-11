@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
 import Header from './Header.js';
 import Footer from './Footer.js';
 import InputCard from './InputCard.js';
 
 function App() {
+
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
