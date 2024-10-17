@@ -1,20 +1,16 @@
-from flask import Flask, request, jsonify
-import time
-import requests
-
+from flask import Flask, request, redirect, jsonify, make_response
 from flask_cors import CORS
-
 from api.book_jobs import book_surveyhub_job, book_ehouse_job
+from api.validate_token import validate_token
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
+FRONTEND_URL = os.getenv('FRONTEND_URL')
 
 import esurv_db_manager as es
 app = Flask(__name__, static_folder='./build', static_url_path='/')
 CORS(app)
-
-@app.route('/api/time')
-def get_current_time():
-    
-    return {'time': time.time()}
-
 
     #Mock - replace with DB call
 def get_addresses_and_region(postcode):
@@ -28,6 +24,19 @@ def get_addresses_and_region(postcode):
     mock_region = "Scotland"
 
     return mock_addresses, mock_region
+
+@app.route('/', methods=['GET'])
+def index():
+    #token = request.headers.get('token')
+    token = '12345'
+    
+    validity = validate_token(token)
+    if validity == 'valid':
+        response = make_response(redirect(FRONTEND_URL))
+        return response
+    else:
+        return 'Invalid Token'
+        
     
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
