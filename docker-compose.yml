@@ -2,19 +2,24 @@ services:
   api:
     container_name: api
     build:
-      context: ./api
-      dockerfile: Dockerfile
-    ports:
-      - 8000:8000
-    # env_file:
-    #   - ./api/.flaskenv.dev
+      context: .
+      dockerfile: Dockerfile.prod
+    expose:
+      - 8000
+    env_file:
+      - ./api/.flaskenv.prod
     restart: always
-  client:
-    container_name: client
-    build:
-      context: ./client
-      dockerfile: Dockerfile
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./ca:/etc/nginx/certs
     ports:
-      - 3000:3000
+      - 80:80
+      - 443:443
+    depends_on:
+      - api
     restart: always
-    stdin_open: true
+
+volumes:
+  static_volume:

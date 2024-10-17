@@ -3,7 +3,7 @@
 ###########
 
 # Build the React front end.
-FROM node:16-alpine as build-client
+FROM node:21-alpine as build-client
 
 # set work directory
 RUN mkdir /app

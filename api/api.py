@@ -4,7 +4,7 @@ import requests
 
 from flask_cors import CORS
 
-from api.book_jobs import book_surveyhub_job, book_ehouse_job
+from book_jobs import book_surveyhub_job, book_ehouse_job
 
 import esurv_db_manager as es
 app = Flask(__name__, static_folder='./build', static_url_path='/')
