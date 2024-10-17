@@ -49,6 +49,7 @@ RUN pip install --no-cache /wheels/*
 
 # install ODBC driver
 RUN apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y curl gnupg2 && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
@@ -61,4 +62,6 @@ COPY --from=build-client /app/build staticfiles/
 # copy api files
 COPY ./api .
 
-CMD ["gunicorn", "-b", ":8000", "api:app"]
+EXPOSE 80
+
+CMD ["gunicorn", "-b", "0.0.0.0:80", "api:app"]
