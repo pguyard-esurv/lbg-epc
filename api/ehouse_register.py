@@ -10,6 +10,8 @@ EHOUSE_BRANCH_ID = os.getenv('EHOUSE_BRANCH_ID')
 EHOUSE_BRANCH_SECRET = os.getenv('EHOUSE_BRANCH_SECRET')
 EHOUSE_ACCOUNT_ACTIVATION_TOKEN = os.getenv('EHOUSE_ACCOUNT_ACTIVATION_TOKEN')
 
+EHOUSE_ACCESS_TOKEN = os.getenv('EHOUSE_ACCESS_TOKEN')
+
 def register_ehouse_api_account():
     """
     Here you will supply us with API user account information alongside with the branchId 
@@ -78,9 +80,16 @@ def get_ehouse_token():
     response = requests.post('https://api.ehouse.co.uk/token', headers=headers, data=data, verify='d:\python\lib\site-packages\certifi\cacert.pem')
     return response
 
-import certifi
+#token_response = get_ehouse_token()
+#print(token_response)
 
-print(certifi.where())
+response = requests.get('https://google.com', verify=True)
+print(response)
 
-token_response = get_ehouse_token()
-print(token_response)
+
+headers = {
+    'Accept': 'application/json',
+    'Authorization': EHOUSE_ACCESS_TOKEN
+}
+response = requests.get('https://api.ehouse.co.uk/v2/KeyInvoiceItems', headers=headers, verify=True)
+print(response)
