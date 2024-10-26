@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, jsonify, make_response
 from flask_cors import CORS
-from api.book_jobs import book_surveyhub_job, book_ehouse_job
+from api.book_ehouse_job import book_ehouse_job
+from api.book_surveyhub_job import book_surveyhub_job
 from api.validate_token import validate_token
 import os
 
@@ -73,6 +74,7 @@ def submit_form():
         house_number = '123'
         street = 'Street St'
         postcode = 'W8 7QG'
+        town = 'Townville'
         
         first_name = 'Firstname'
         last_name = 'Lastname'
@@ -83,7 +85,9 @@ def submit_form():
         if data['region'] == 'Scotland':
             book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
         else:
-            book_ehouse_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
+            street_address = house_number + ' ' + street
+            name = first_name + ' ' + last_name
+            book_ehouse_job(street_address, postcode, town, name, email_address, phone_number)
             
 
         return jsonify({"message": "Form data received successfully"}), 200
