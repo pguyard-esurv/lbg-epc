@@ -1,0 +1,342 @@
+openapi: 3.0.1
+info:
+  title: Sustainability Epc Validate Token Api
+  description: API called by e.surv to validate the token that was sent to them in a previous operation.
+  version: 1.0.0
+  contact:
+    name: Turing Team
+    url: https://confluence.devops.lloydsbanking.com/display/MTGCHG/Turing
+    email: turingmvs@nalloydsbanking.com
+servers:
+  - url: https://localhost/homes/external-apis/{environment}sustainability/v1/epc/token
+paths:
+  /:
+    put:
+      tags:
+        - EPC Validate token API
+      summary: Validate token sent from e.surv
+      description: Validate token sent from e.surv that was sent to them in a previous operation
+      operationId: epc-validate-token
+      parameters:
+        - $ref: '#/components/parameters/corrId'
+        - $ref: '#/components/parameters/subscriptionKey'
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/EPCValidateTokenRequest'
+        description: request body in application/json format
+        required: true
+      responses:
+        '200':
+          description: Success
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                status: valid
+              schema:
+                $ref: '#/components/schemas/EPCValidateTokenResponse'
+        '400':
+          description: Bad Request
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: Unauthorised-Request
+                    message: You do not have enough permissions to access.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: ResourceNotFound
+                    message: Cant find this resource
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '405':
+          description: Method Not Allowed
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: InvalidMethod
+                    message: This method not allowed or supported.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '406':
+          description: Not Acceptable
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: NotAcceptable
+                    message: This request or operation not acceptable
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: OverloadedRequests
+                    message: Requests allowed threshold in given time period is exceded
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: UnknownError
+                    message: Unknown failure in processeding your request.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service Not Available
+          headers:
+            x-lbg-api-version:
+              description: x-lbg-api-version
+              schema:
+                type: string
+            access-control-allow-origin:
+              description: access-control-allow-origin
+              schema:
+                type: string
+                pattern: ^[^*]+$
+            x-lbg-txn-correlation-id:
+              description: x-lbg-txn-correlation-id
+              schema:
+                type: string
+            x-content-type-options:
+              description: x-content-type-options
+              schema:
+                type: string
+                pattern: ^nosniff$
+          content:
+            application/json; charset=utf-8:
+              example:
+                errors:
+                  - code: ServiceError
+                    message: Service unavailable at this moment.
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  parameters:
+    corrId:
+      name: x-correlation-id
+      in: header
+      description: correlation Id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: 123e4567-e89b-12d3-a456-426655440000
+    subscriptionKey:
+      name: Ocp-Apim-Subscription-Key
+      in: header
+      schema:
+        type: string
+      example: a000b111c222d333e444f555a666b777c888
+      required: true
+  schemas:
+    EPCValidateTokenRequest:
+      type: object
+      xml:
+        wrapped: true
+      properties:
+        token:
+          type: string
+          example: xx1234567ax123bx456cx789dx00123456789e
+    EPCValidateTokenResponse:
+      type: object
+      xml:
+        wrapped: true
+      properties:
+        payload:
+          type: object
+          properties:
+            status:
+              type: string
+              example: '[valid, invalid, expired, used]'
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          $ref: '#/components/schemas/Error'
+    Error:
+      type: array
+      items:
+        type: object
+        required:
+          - code
+          - message
+        properties:
+          code:
+            type: string
+            example: BACKEND-FAILURE
+          message:
+            type: string
+            example: Failed due to service unreachable

@@ -45,6 +45,18 @@ docker run --rm -p 3000:3000 react-flask-app
 
 **Important and undocumented**: The ehouse API server does not provide the intermediate certificate in its SSL configuration so it was necessary to create a custom combined CA bundle which includes the DigiCert Global Root G2 (root certificate) and the RapidSSL TLS RSA CA G1 (intermediate certificate). This file is located at api\custom_ca_bundle.pem and since it is a public key it is included in the repo.
 
+To recreate the file, get the data from:
+
+DigiCert Global Root G2 (Root Certificate): https://cacerts.digicert.com/DigiCertGlobalRootG2.crt.pem \
+RapidSSL TLS RSA CA G1 (Intermediate Certificate): https://cacerts.digicert.com/RapidSSLTLSRSACAG1.crt.pem
+
+Paste the info from the root certificate first and the info from the intermediate certificate second.
+
+Each should be between:
+
+-----BEGIN CERTIFICATE-----\
+-----END CERTIFICATE-----
+
 # External API Documentation
 
 **LBG Token API**:
