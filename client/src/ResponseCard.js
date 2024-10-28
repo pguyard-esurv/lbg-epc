@@ -4,8 +4,8 @@ import NotScotlandTerms from './NotScotlandTerms';
 import ThankYou from './ThankYou';
 import TermsCardWrapper from './TermsCardWrapper';
 
-// Function to submit response data
 async function submitResponseData(responseData) {
+
   const backendUrl = process.env.REACT_APP_BACKEND_URL + '/api/submit-form';
 
   const response = await fetch(backendUrl, {
@@ -20,7 +20,6 @@ async function submitResponseData(responseData) {
 }
 
 function ResponseCard({ responseData }) {
-  const [submissionResult] = useState(responseData[1]);
   const [submissionStatus, setSubmissionStatus] = useState(null); // null, 'pending', 'success', or 'error'
 
   const handleSubmit = async () => {
@@ -43,8 +42,8 @@ function ResponseCard({ responseData }) {
     return <ThankYou />;
   }
 
-  if (responseData.region) {
-    if (responseData.region === 'Scotland') {
+  if (responseData.selectedAddress.region) {
+    if (responseData.selectedAddress.region === 'Scotland') {
       return (
         <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
           <ScotlandTerms />
@@ -52,7 +51,8 @@ function ResponseCard({ responseData }) {
       );
     }
 
-    if (responseData.region && responseData.region !== 'Scotland') {
+    if (responseData.selectedAddress.region !== 'Scotland') {
+
       return (
         <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
           <NotScotlandTerms />

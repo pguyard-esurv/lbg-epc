@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, jsonify, make_response
 from flask_cors import CORS
-from api.book_jobs import book_surveyhub_job, book_ehouse_job
+from api.book_ehouse_job import book_ehouse_job
+from api.book_surveyhub_job import book_surveyhub_job
 from api.validate_token import validate_token
 import os
 
@@ -13,17 +14,61 @@ app = Flask(__name__, static_folder='./build', static_url_path='/')
 CORS(app)
 
     #Mock - replace with DB call
-def get_addresses_and_region(postcode):
-
-    mock_addresses = [
-        "123 High Street, W8 7QG",
-        "456 Low Road, W8 7QG",
-        "789 Side Lane, W8 7QG"
-    ]
+def get_addresses_from_db(postcode):
     
-    mock_region = "Scotland"
+    'building_name_number' #concatenate from buildingname and buildingnumber from the address db
+    'street' #addr1 in the address db
+    'town' #posttown in the address db
+    'postcode'
+    'region' #country in the address db
+    
+    mock_addresses = [
+        
+        {
+            'building_name_number': '123',
+            'street': 'High Street',
+            'town': 'Newcastle upon Tyne',
+            'postcode': 'W8 7QG',
+            'region': 'England',
+            },
+        {
+            'building_name_number': 'Foundry Park',
+            'street': 'High Street',
+            'town': 'Newcastle upon Tyne',
+            'postcode': 'W8 7QG',
+            'region': 'England',
+            },
+        {
+            'building_name_number': '789',
+            'street': 'Side Lane',
+            'town': 'Newcastle upon Tyne',
+            'postcode': 'W8 7QG',
+            'region': 'England',
+            },
+        {
+            'building_name_number': '5',
+            'street': 'Lower Road',
+            'town': 'Newcastle upon Tyne',
+            'postcode': 'W8 7QG',
+            'region': 'England',
+            },
+    ]
 
-    return mock_addresses, mock_region
+    return mock_addresses
+
+def split_name(full_name):
+    parts = full_name.split(" ")
+    
+    if len(parts) == 1:
+        # If there's only one name, treat it as the last name with an empty first name
+        first_name = ""
+        last_name = parts[0]
+    else:
+        # Otherwise, join all parts except the last one for the first name
+        first_name = " ".join(parts[:-1])
+        last_name = parts[-1]
+    
+    return first_name, last_name
 
 @app.route('/', methods=['GET'])
 def index():
@@ -36,7 +81,6 @@ def index():
         return response
     else:
         return 'Invalid Token'
-        
     
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
@@ -45,20 +89,20 @@ def get_addresses():
     
     data = request.get_json()
     
-    postcode = data.get('postcode')
-    token = data.get('token')
-
-    if not postcode or not token:
-        return jsonify({"error": "Missing postcode or token"}), 400
+    print(data)
     
-    addresses, region = get_addresses_and_region(postcode)
+    postcode = data.get('postcode')
 
-    if addresses is None or region is None:
+    if not postcode:
+        return jsonify({"error": "Missing postcode"}), 400
+    
+    addresses = get_addresses_from_db(postcode)
+
+    if addresses is None:
         return jsonify({"error": "Invalid token or postcode"}), 400
     
     response = {
         "addresses": addresses,
-        "region": region
     }
     
     return jsonify(response), 200
@@ -68,22 +112,26 @@ def submit_form():
     try:
         data = request.get_json()
         
-        #need to unpack these from data. Need to separate names and house number/street. Maybe ask for more detailed info from MI for addresses
+        full_name = data['fullName']
+        first_name, last_name = split_name(full_name)
         
-        house_number = '123'
-        street = 'Street St'
-        postcode = 'W8 7QG'
+        email_address = data['email']
+        phone_number = data['telephone']
         
-        first_name = 'Firstname'
-        last_name = 'Lastname'
+        house_number = data['selectedAddress']['building_name_number']
+        street = data['selectedAddress']['street']
+        town = data['selectedAddress']['town']
+        postcode = data['selectedAddress']['postcode']
+        region = data['selectedAddress']['region']
         
-        email_address = 'name@address.com'
-        phone_number = '07123456789'
-        
-        if data['region'] == 'Scotland':
+        if region == 'Scotland':
             book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
         else:
-            book_ehouse_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
+            street_address = house_number + ' ' + street
+            
+            print(street_address, postcode, town, full_name, email_address, phone_number)
+
+            book_ehouse_job(street_address, postcode, town, full_name, email_address, phone_number)
             
 
         return jsonify({"message": "Form data received successfully"}), 200
