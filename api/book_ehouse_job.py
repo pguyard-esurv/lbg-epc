@@ -106,6 +106,7 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
     if response.status_code != 200:
             raise Exception(response.json())
 
+"""
 
 street_address = '12345 Place St'
 postcode = 'W8 7QG'
@@ -115,3 +116,5 @@ email_address = 'name@domain.com'
 phone_number = '07 123 456 789'
 
 book_ehouse_job(street_address, postcode, town, name, email_address, phone_number)
+
+"""

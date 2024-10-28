@@ -10,13 +10,19 @@ function FormCard({ onFormSubmit }) {
     email: '',
     customerRoll: '',
     selectedAddress: '',
-    region: '',
     agreeToPrivacy: false,
   });
 
   const [postcode, setPostcode] = useState('');
-  const [region, setRegion] = useState('');
   const [addresses, setAddresses] = useState([]);
+  const [manualAddress, setManualAddress] = useState({
+    building_name_number: '',
+    street: '',
+    town: '',
+    postcode: '',
+    region: ''
+  });
+  
   const [postcodeError, setPostcodeError] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
@@ -60,8 +66,8 @@ function FormCard({ onFormSubmit }) {
     } else if (!rollNumberRegex.test(formData.customerRoll)) {
       errors.customerRoll = 'Customer Roll Number must be exactly 12 digits.';
     }
-    if (!formData.selectedAddress.trim()) {
-      errors.selectedAddress = 'You must select an address.';
+    if (!manualAddress.building_name_number?.trim() || !manualAddress.street?.trim()) {
+      errors.selectedAddress = 'You must select or enter an address.';
     }
     if (!formData.agreeToPrivacy) {
       errors.agreeToPrivacy = 'You need to accept the privacy terms.';
@@ -77,7 +83,8 @@ function FormCard({ onFormSubmit }) {
       setFormErrors(errors);
       return;
     }
-    onFormSubmit(formData); // Include region in the submitted form data
+    // Replace selectedAddress with manualAddress in form submission
+    onFormSubmit({ ...formData, selectedAddress: manualAddress });
   }
 
   // Handle postcode search and address lookup
@@ -92,8 +99,7 @@ function FormCard({ onFormSubmit }) {
     setPostcodeError(false); // Reset error if valid postcode
 
     const requestData = {
-      postcode: postcode,
-      token: '12345', // Replace with your actual token
+      postcode: postcode
     };
 
     fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-addresses`, {
@@ -111,7 +117,6 @@ function FormCard({ onFormSubmit }) {
       })
       .then((data) => {
         setAddresses(data.addresses);
-        setRegion(data.region);
       })
 
       .catch((error) => {
@@ -119,13 +124,9 @@ function FormCard({ onFormSubmit }) {
       });
   }
 
-  // Select address from fetched addresses and save region
+  // Select address from fetched addresses and save to manual input
   function selectAddress(address) {
-    setFormData((prevData) => ({
-      ...prevData,
-      selectedAddress: address, // Store selected address
-      region: region, // Store region
-    }));
+    setManualAddress(address); // Populate the manual input with the selected address
 
     // Clear the selectedAddress error when an address is selected
     setFormErrors((prevErrors) => ({
@@ -244,36 +245,73 @@ function FormCard({ onFormSubmit }) {
               {postcodeError && (
                 <p className="text-red-500 mt-2">Invalid postcode. Please enter a valid postcode.</p>
               )}
-
-              {/* Show the error under the postcode search if no address is selected and no addresses have been fetched */}
-              {formErrors.selectedAddress && addresses.length === 0 && (
-                <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
-              )}
+              {formErrors.selectedAddress && (!manualAddress.building_name_number?.trim() || !manualAddress.street?.trim()) && (
+                  <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
+                )}
             </div>
 
             {/* Display list of addresses */}
             {addresses.length > 0 && (
-              <div className="bg-gray-100 text-black p-4 rounded mt-2 max-h-40 overflow-y-auto">
+              <div className="bg-primary-dark text-white p-4 rounded mt-2 max-h-40 overflow-y-auto border border-white">
                 {addresses.map((address, index) => (
                   <button
                     key={index}
                     type="button"
                     onClick={() => selectAddress(address)}
-                    className={`block w-full text-left p-2 mb-2 border ${
-                      formData.selectedAddress === address
-                        ? 'border-blue-500'
-                        : 'border-gray-300'
-                    } rounded hover:bg-gray-200`}
+                    className={`block w-full text-left p-2 mb-2 rounded ${
+                      manualAddress === address ? 'bg-white text-primary-dark' : 'bg-primary-dark text-white'
+                    } border border-white hover:bg-white hover:text-primary-dark`}
                   >
-                    {address}
+                    {address.building_name_number} {address.street}, {address.town}, {address.postcode}
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Show the error below the addresses if there are addresses but none selected */}
-            {formErrors.selectedAddress && addresses.length > 0 && (
-              <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
+            {/* Manual Input for Address */}
+            {addresses.length > 0 && (
+              <div className="mt-3 mb-4">
+                <label className="block text-sm font-medium mb-2">Address</label>
+                <div className="flex space-x-2">
+                  {/* Input for Building Name/Number */}
+                  <input
+                    type="text"
+                    value={manualAddress.building_name_number || ""}
+                    onChange={(e) =>
+                      setManualAddress({ ...manualAddress, building_name_number: e.target.value })
+                    }
+                    className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                    placeholder="Building Name/Number"
+                  />
+
+                  {/* Input for Street */}
+                  <input
+                    type="text"
+                    value={manualAddress.street || ""}
+                    onChange={(e) =>
+                      setManualAddress({ ...manualAddress, street: e.target.value })
+                    }
+                    className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                    placeholder="Street"
+                  />
+
+                  {/* Display for Town */}
+                  <input
+                    type="text"
+                    value={manualAddress.town || ""}
+                    onChange={(e) =>
+                      setManualAddress({ ...manualAddress, town: e.target.value })
+                    }
+                    className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                    placeholder="Town"
+                  />
+                </div>
+
+                {/* Show the error below the manual input if no text is entered */}
+                {formErrors.selectedAddress && (!manualAddress.building_name_number?.trim() || !manualAddress.street?.trim()) && (
+                  <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
+                )}
+              </div>
             )}
 
             {/* Privacy Checkbox */}

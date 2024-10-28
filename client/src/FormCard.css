@@ -5,3 +5,20 @@
 .input-border-error {
     border: 1px solid red;
 }
+
+/* Autofill style for Chrome, Edge, and other WebKit-based browsers */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: white !important;
+  box-shadow: 0 0 0px 1000px #0c2538 inset !important; /* matches your primary dark color */
+  background-color: #0c2538 !important;
+}
+
+/* For non-WebKit browsers (optional styling if needed) */
+input:autofill,
+input:autofill:hover,
+input:autofill:focus {
+  color: white !important;
+  background-color: #0c2538 !important;
+}

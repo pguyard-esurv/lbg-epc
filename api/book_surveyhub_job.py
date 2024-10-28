@@ -77,6 +77,8 @@ def test_sh_auth_api():
     
     return response
 
+"""
+
 response = test_sh_auth_api()
 print(response.status_code)
 
@@ -92,3 +94,5 @@ phone_number = '07 123 456 789'
 #response = book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
 #print(response.status_code)
 #print(response.json())
+
+"""
