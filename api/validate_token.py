@@ -7,14 +7,23 @@ load_dotenv()
 LBG_SUBSCRIPTION_KEY = os.getenv('LBG_SUBSCRIPTION_KEY')
 LBG_API_BASE_URL = os.getenv('LBG_API_BASE_URL')
 LBG_API_ENV = os.getenv('LBG_API_ENV')
+PROD_STATUS = os.getenv('PROD_STATUS')
 
 def validate_token(token):
-    url = f'{LBG_API_BASE_URL}/homes/external-apis/{LBG_API_ENV}sustainability/v1/epc/token/'
+    
+    halifax_url = 'https://mortgages.secure.halifax-online.co.uk/home/external-apis/sustainability/epc/token'
+
+    lloyds_url = 'https://mortgages.secure.lloydsbank.co.uk/home/external-apis/sustainability/epc/token'
+    
+    url = halifax_url
+
     
     correlation_id = str(uuid.uuid4())
+    session_id = str(uuid.uuid4())
 
     headers = {
         'x-correlation-id': correlation_id,
+        'x-session-id': session_id,
         'Ocp-Apim-Subscription-Key': LBG_SUBSCRIPTION_KEY,
         'Content-Type': 'application/json; charset=utf-8'
     }
@@ -23,7 +32,8 @@ def validate_token(token):
         'token': token
     }
     
-    return 'valid'
+    if PROD_STATUS == 'dev':
+        return 'valid'
 
     try:
         response = requests.put(url, headers=headers, json=data, verify=False)

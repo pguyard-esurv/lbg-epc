@@ -1,27 +1,25 @@
-from flask import Flask, request, redirect, jsonify, make_response
+from dotenv import load_dotenv
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from api.book_ehouse_job import book_ehouse_job
 from api.book_surveyhub_job import book_surveyhub_job
 from api.validate_token import validate_token
 import os
-
-from dotenv import load_dotenv
-load_dotenv()
-FRONTEND_URL = os.getenv('FRONTEND_URL')
-
+from functools import wraps
 import esurv_db_manager as es
-app = Flask(__name__, static_folder='./build', static_url_path='/')
+
+load_dotenv()
+PROD_STATUS = os.getenv('PROD_STATUS')
+
+app = Flask(__name__, static_folder=os.path.join('..', 'client', 'build'), static_url_path='')
 CORS(app)
 
-    #Mock - replace with DB call
+#
+# Helper functions
+#
+
+# Mock function - replace with DB call
 def get_addresses_from_db(postcode):
-    
-    'building_name_number' #concatenate from buildingname and buildingnumber from the address db
-    'street' #addr1 in the address db
-    'town' #posttown in the address db
-    'postcode'
-    'region' #country in the address db
-    
     mock_addresses = [
         
         {
@@ -50,97 +48,99 @@ def get_addresses_from_db(postcode):
             'street': 'Lower Road',
             'town': 'Newcastle upon Tyne',
             'postcode': 'W8 7QG',
-            'region': 'England',
+            'region': 'Scotland',
             },
     ]
-
     return mock_addresses
 
+# Split full name into first and last name
 def split_name(full_name):
     parts = full_name.split(" ")
-    
     if len(parts) == 1:
-        # If there's only one name, treat it as the last name with an empty first name
-        first_name = ""
-        last_name = parts[0]
-    else:
-        # Otherwise, join all parts except the last one for the first name
-        first_name = " ".join(parts[:-1])
-        last_name = parts[-1]
-    
-    return first_name, last_name
+        return "", parts[0]
+    return " ".join(parts[:-1]), parts[-1]
 
-@app.route('/', methods=['GET'])
-def index():
-    #token = request.headers.get('token')
-    token = '12345'
+# Decorator for token validation
+def token_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        
+        print(request.headers)
+        
+        if PROD_STATUS == 'dev':
+            token = 'token'
+        else:
+            token = request.headers.get('token')
+            
+        if not token or validate_token(token) not in ('valid', 'used'):
+            return jsonify({"error": "Invalid token"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+def log_epc_submission(full_name, email_address, phone_number, address, api_call, complete):
     
-    validity = validate_token(token)
-    if validity == 'valid':
-        response = make_response(redirect(FRONTEND_URL))
-        return response
-    else:
-        return 'Invalid Token'
+    print(full_name, email_address, phone_number, address, api_call, complete)
     
+    # log these in local postgres database
+    
+
+#
+# Routes
+#
+
+# Serve React app's static files for non-API routes, with token validation
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+@token_required
+def serve_react(path):
+    if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
+
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
     if not request.is_json:
         return jsonify({"error": "Invalid content type, expecting JSON"}), 400
     
     data = request.get_json()
-    
-    print(data)
-    
     postcode = data.get('postcode')
-
     if not postcode:
         return jsonify({"error": "Missing postcode"}), 400
     
     addresses = get_addresses_from_db(postcode)
-
-    if addresses is None:
-        return jsonify({"error": "Invalid token or postcode"}), 400
-    
-    response = {
-        "addresses": addresses,
-    }
-    
-    return jsonify(response), 200
+    return jsonify({"addresses": addresses}), 200
 
 @app.route('/api/submit-form', methods=['POST'])
 def submit_form():
+    full_name, email_address, phone_number, address, api_call = [''] * 5
+    complete = -1
     try:
         data = request.get_json()
-        
         full_name = data['fullName']
         first_name, last_name = split_name(full_name)
-        
         email_address = data['email']
         phone_number = data['telephone']
-        
-        house_number = data['selectedAddress']['building_name_number']
-        street = data['selectedAddress']['street']
-        town = data['selectedAddress']['town']
-        postcode = data['selectedAddress']['postcode']
-        region = data['selectedAddress']['region']
-        
-        if region == 'Scotland':
-            book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
-        else:
-            street_address = house_number + ' ' + street
-            
-            print(street_address, postcode, town, full_name, email_address, phone_number)
+        address = data['selectedAddress']
+        region = address['region']
 
-            book_ehouse_job(street_address, postcode, town, full_name, email_address, phone_number)
+        if region == 'Scotland':
+            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number)
+            api_call = 'surveyhub'
+        else:
+            street_address = f"{address['building_name_number']} {address['street']}"
+            book_ehouse_job(street_address, address['postcode'], address['town'], full_name, email_address, phone_number)
+            api_call = 'ehouse'
             
+        complete = 1
+        log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
 
         return jsonify({"message": "Form data received successfully"}), 200
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        complete = -1
+        log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
         return jsonify({"error": "Failed to process form data"}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
