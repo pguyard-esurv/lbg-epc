@@ -11,7 +11,10 @@ import esurv_db_manager as es
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
 
-app = Flask(__name__, static_folder=os.path.join('..', 'client', 'build'), static_url_path='')
+static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
+
+app = Flask(__name__, static_folder=static_folder, static_url_path='')
+
 CORS(app)
 
 #
