@@ -1,15 +1,15 @@
-import requests
-
+import json
 import os
+import requests
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 SH_API_KEY = os.getenv('SH_API_KEY')
 SH_API_BASE_URL = os.getenv('SH_API_BASE_URL')
 
 def book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number):
 
-    url = f'{SH_API_BASE_URL}api/job'
+    url = SH_API_BASE_URL + 'api/job'
 
     try:    
         headers = {
@@ -18,10 +18,15 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
         }
         
         instruction_ref = 'instruction'
-        product_name = 'Scottish EPC'
+        product_name = 'Energy Performance'
+        product_name = 'Mortgage Valuation'
         
         data = f'''{{
-            "instructionRef": "{instruction_ref}",
+            "instructionRef": '{instruction_ref}',
+            "CompanyName": "string",
+            "LenderName": "Lloyds",
+            "LenderRef": "",
+            "InstructedBy": "",
             "products": [
                 {{
                     "name": "{product_name}"
@@ -52,11 +57,23 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
             data=data,
         )
 
-        print(response.json())
+        return response
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
 
-def book_ehouse_job(house_number, street, postcode, first_name, last_name, email_address, phone_number):
-    #write this
-    pass
+"""
+
+house_number = '123'
+street = 'Place St.'
+postcode = 'W8 7QG'
+first_name = 'First'
+last_name = 'Last'
+email_address = 'name@domain.com'
+phone_number = '07 123 456 789'
+
+#response = book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
+#print(response.status_code)
+#print(response.json())
+
+"""

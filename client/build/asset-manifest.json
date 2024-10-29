@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/static/css/main.1c7e90a2.css",
-    "main.js": "/static/js/main.a2657e05.js",
+    "main.css": "/static/css/main.144c325d.css",
+    "main.js": "/static/js/main.7a6daf0c.js",
     "static/media/esurv-logo.png": "/static/media/esurv-logo.3b7bcbbd3d058a03a86f.png",
     "index.html": "/index.html",
-    "main.1c7e90a2.css.map": "/static/css/main.1c7e90a2.css.map",
-    "main.a2657e05.js.map": "/static/js/main.a2657e05.js.map"
+    "main.144c325d.css.map": "/static/css/main.144c325d.css.map",
+    "main.7a6daf0c.js.map": "/static/js/main.7a6daf0c.js.map"
   },
   "entrypoints": [
-    "static/css/main.1c7e90a2.css",
-    "static/js/main.a2657e05.js"
+    "static/css/main.144c325d.css",
+    "static/js/main.7a6daf0c.js"
   ]
 }
