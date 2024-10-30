@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_cors import CORS
-from book_ehouse_job import book_ehouse_job
-from book_surveyhub_job import book_surveyhub_job
-from validate_token import validate_token
+from api.book_ehouse_job import book_ehouse_job
+from api.book_surveyhub_job import book_surveyhub_job
+from api.validate_token import validate_token
 import os
 from functools import wraps
 import esurv_db_manager as es
@@ -63,17 +63,27 @@ def split_name(full_name):
         return "", parts[0]
     return " ".join(parts[:-1]), parts[-1]
 
+def validate_token(token):
+    # Placeholder validation logic
+    return 'valid' if token == "xyz" else 'invalid'
+
 # Decorator for token validation
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         
-        print(request.headers)
+        print('token in headers:')
+        print(request.headers.get('token'))
+        
+        token = request.headers.get('token')
+        
+        """
         
         if PROD_STATUS == 'dev':
             token = 'token'
         else:
             token = request.headers.get('token')
+        """
             
         if not token or validate_token(token) not in ('valid', 'used'):
             return jsonify({"error": "Invalid token"}), 401
@@ -91,11 +101,51 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 # Routes
 #
 
-# Serve React app's static files for non-API routes, with token validation
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-@token_required
+@app.route('/sample-page')
+def simulate_external():
+    # Simulate external app sending a POST request with the token only on link click
+    return """
+    <script>
+        function navigateToApp() {
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ "token": "xyz" })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "/";  // Navigate to home after successful POST
+                } else {
+                    console.error("Invalid token");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+    </script>
+    <a href="#" onclick="navigateToApp()">Simulate External Request</a>
+    """
+
+
+# Initial token validation with POST
+@app.route('/', methods=['POST'])
+def validate_and_serve():
+    token = request.json.get('token')
+    print('token in request body:', token)
+    if not token or validate_token(token) != 'valid':
+        return jsonify({"error": "Invalid or missing token"}), 401
+    
+    # Token is valid; redirect to GET route to serve the app
+    return redirect(url_for('serve_react'))
+
+# Serve React app with GET request
+@app.route('/', defaults={'path': ''}, methods=['GET'])
+@app.route('/<path:path>', methods=['GET'])
 def serve_react(path):
+    # Serve static files for React app
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, 'index.html')
