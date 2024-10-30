@@ -17,46 +17,42 @@ app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
 CORS(app)
 
-#
 # Helper functions
-#
 
 # Mock function - replace with DB call
 def get_addresses_from_db(postcode):
     mock_addresses = [
-        
         {
             'building_name_number': '123',
             'street': 'High Street',
             'town': 'Newcastle upon Tyne',
             'postcode': 'W8 7QG',
             'region': 'England',
-            },
+        },
         {
             'building_name_number': 'Foundry Park',
             'street': 'High Street',
             'town': 'Newcastle upon Tyne',
             'postcode': 'W8 7QG',
             'region': 'England',
-            },
+        },
         {
             'building_name_number': '789',
             'street': 'Side Lane',
             'town': 'Newcastle upon Tyne',
             'postcode': 'W8 7QG',
             'region': 'England',
-            },
+        },
         {
             'building_name_number': '5',
             'street': 'Lower Road',
             'town': 'Newcastle upon Tyne',
             'postcode': 'W8 7QG',
             'region': 'Scotland',
-            },
+        },
     ]
     return mock_addresses
 
-# Split full name into first and last name
 def split_name(full_name):
     parts = full_name.split(" ")
     if len(parts) == 1:
@@ -64,88 +60,34 @@ def split_name(full_name):
     return " ".join(parts[:-1]), parts[-1]
 
 def validate_token(token):
-    # Placeholder validation logic
     return 'valid' if token == "xyz" else 'invalid'
 
 # Decorator for token validation
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        
-        print('token in headers:')
-        print(request.headers.get('token'))
-        
-        token = request.headers.get('token')
-        
-        """
-        
-        if PROD_STATUS == 'dev':
-            token = 'token'
-        else:
-            token = request.headers.get('token')
-        """
-            
+        token = request.args.get('token')
         if not token or validate_token(token) not in ('valid', 'used'):
             return jsonify({"error": "Invalid token"}), 401
         return f(*args, **kwargs)
     return decorated_function
 
 def log_epc_submission(full_name, email_address, phone_number, address, api_call, complete):
-    
     print(full_name, email_address, phone_number, address, api_call, complete)
-    
-    # log these in local postgres database
-    
 
-#
 # Routes
-#
 
-@app.route('/sample-page')
+@app.route('/external-page')
 def simulate_external():
-    # Simulate external app sending a POST request with the token only on link click
     return """
-    <script>
-        function navigateToApp() {
-            fetch("/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ "token": "xyz" })
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = "/";  // Navigate to home after successful POST
-                } else {
-                    console.error("Invalid token");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        }
-    </script>
-    <a href="#" onclick="navigateToApp()">Simulate External Request</a>
+    <a href="/?token=xyz">Simulate External Request</a>
     """
 
-
-# Initial token validation with POST
-@app.route('/', methods=['POST'])
-def validate_and_serve():
-    token = request.json.get('token')
-    print('token in request body:', token)
-    if not token or validate_token(token) != 'valid':
-        return jsonify({"error": "Invalid or missing token"}), 401
-    
-    # Token is valid; redirect to GET route to serve the app
-    return redirect(url_for('serve_react'))
-
-# Serve React app with GET request
+# Initial token validation and serving React app with GET request
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 @app.route('/<path:path>', methods=['GET'])
+@token_required
 def serve_react(path):
-    # Serve static files for React app
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, 'index.html')
