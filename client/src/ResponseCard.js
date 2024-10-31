@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import ScotlandTerms from './ScotlandTerms';
-import NotScotlandTerms from './NotScotlandTerms';
+import Terms from './Terms';
 import ThankYou from './ThankYou';
 import TermsCardWrapper from './TermsCardWrapper';
 
@@ -42,32 +41,17 @@ function ResponseCard({ responseData }) {
     return <ThankYou />;
   }
 
-  if (responseData.selectedAddress.region) {
-    if (responseData.selectedAddress.region === 'Scotland') {
-      return (
-        <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
-          <ScotlandTerms />
-        </TermsCardWrapper>
-      );
-    }
 
-    if (responseData.selectedAddress.region !== 'Scotland') {
 
-      return (
-        <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
-          <NotScotlandTerms />
-        </TermsCardWrapper>
-      );
-    }
-  } else {
-    return (
-      <div className="response-card-container">
-        <div className="max-w-6xl mx-auto mt-2 text-black font-sans text-center">
-          <h1 className="text-2xl font-bold">{responseData[0]}</h1>
-        </div>
-      </div>
-    );
-  }
+
+
+  return (
+    <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
+      <Terms />
+    </TermsCardWrapper>
+  );
+
+
 }
 
 export default ResponseCard;

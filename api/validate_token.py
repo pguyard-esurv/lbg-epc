@@ -43,14 +43,18 @@ def validate_token(token):
     }
     
     if PROD_STATUS == 'dev':
+        print('fail')
         return 'valid'
 
     try:
-        response = requests.put(url, headers=headers, json=data)
+        response = requests.put(url, headers=headers, json=data, verify=False)
+        
+        print(response)
+        print(response.text)
         
         #verify=False)
         
-        return response
+        #return response
 
         if response.status_code == 200:
             json_response = response.json()

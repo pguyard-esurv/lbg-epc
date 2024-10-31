@@ -59,14 +59,17 @@ def split_name(full_name):
         return "", parts[0]
     return " ".join(parts[:-1]), parts[-1]
 
-def validate_token(token):
-    return 'valid' if token == "xyz" else 'invalid'
+#def validate_token(token):
+#    return 'valid' if token == "xyz" else 'invalid'
 
 # Decorator for token validation
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.args.get('token')
+        validity = validate_token(token)
+        print(validity)
+        print(PROD_STATUS)
         if not token or validate_token(token) not in ('valid', 'used'):
             return jsonify({"error": "Invalid token"}), 401
         return f(*args, **kwargs)
@@ -80,7 +83,7 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 @app.route('/external-page')
 def simulate_external():
     return """
-    <a href="/?token=xyz">Simulate External Request</a>
+    <a href="/?token=valid">Simulate External Request</a>
     """
 
 # Initial token validation and serving React app with GET request
