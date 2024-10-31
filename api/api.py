@@ -80,12 +80,16 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 # Routes
 
+@app.route('/', defaults={'path': ''}, methods=['GET'])
+def index():
+    return 'Test Passed'
+
 @app.route('/external-page')
 def simulate_external():
     return """
     <a href="/?token=valid">Simulate External Request</a>
     """
-
+"""
 # Initial token validation and serving React app with GET request
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 @app.route('/<path:path>', methods=['GET'])
@@ -94,6 +98,7 @@ def serve_react(path):
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, 'index.html')
+"""
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
