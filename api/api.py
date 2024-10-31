@@ -82,7 +82,7 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 @app.route('/', methods=['GET'])
 def index():
-    return 'Test Passed'
+    return 'Test Passed?'
 
 @app.route('/external-page')
 def simulate_external():
