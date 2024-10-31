@@ -80,7 +80,7 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 # Routes
 
-@app.route('/', defaults={'path': ''}, methods=['GET'])
+@app.route('/', methods=['GET'])
 def index():
     return 'Test Passed'
 
