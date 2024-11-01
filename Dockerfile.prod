@@ -2,20 +2,6 @@
 # BUILDER #
 ###########
 
-# Build the React front end.
-FROM node:21-alpine as build-client
-
-# set work directory
-RUN mkdir /app
-WORKDIR /app
-
-ENV PATH /app/node_modules/.bin:$PATH
-
-COPY ./client .
-
-RUN yarn install
-RUN yarn build
-
 # Build pip requirements.
 FROM python:3.9.7-slim-buster as build-reqs
 
@@ -55,9 +41,6 @@ RUN apt-get update && \
     curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql18
-
-# copy client build files
-COPY --from=build-client /app/build staticfiles/
 
 # copy api files
 COPY ./api .
