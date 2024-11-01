@@ -88,7 +88,7 @@ def index():
         validity = validate_token(token)
         return f"{validity}"
     else:
-        return "no token"
+        return "No Token."
 
 @app.route('/external-page')
 def simulate_external():
