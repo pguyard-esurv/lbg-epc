@@ -1,9 +1,9 @@
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_cors import CORS
-from book_ehouse_job import book_ehouse_job
-from book_surveyhub_job import book_surveyhub_job
-from validate_token import validate_token
+from api.book_ehouse_job import book_ehouse_job
+from api.book_surveyhub_job import book_surveyhub_job
+from api.validate_token import validate_token
 import os
 from functools import wraps
 import esurv_db_manager as es
