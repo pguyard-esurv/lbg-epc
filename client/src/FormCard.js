@@ -22,11 +22,11 @@ function FormCard({ onFormSubmit }) {
     postcode: '',
     region: ''
   });
-  
+
+  const [country, setCountry] = useState('');
   const [postcodeError, setPostcodeError] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
-  // Handle input changes
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({
@@ -39,15 +39,29 @@ function FormCard({ onFormSubmit }) {
     }));
   }
 
-  // Form validation
+  // Separate function to handle country selection and error clearing
+  function handleCountryChange(e) {
+    const selectedCountry = e.target.value;
+    setCountry(selectedCountry);
+    setFormErrors((prevErrors) => ({
+      ...prevErrors,
+      country: selectedCountry ? '' : prevErrors.country, // Clear the error if a country is selected
+    }));
+  }
+
+  function formatPostcode(pc) {
+    pc = pc.toUpperCase().replace(/\s+/g, '');
+    return pc.length > 3 ? `${pc.slice(0, -3)} ${pc.slice(-3)}` : pc;
+  }
+
   function validateForm() {
     const errors = {};
     if (!formData.fullName.trim()) {
       errors.fullName = 'Full Name is required.';
     }
-    // Telephone validation (must be at least 9 digits, can contain numbers, spaces, +, -, parentheses, and full stops)
-    const phoneRegex = /^[\d\s+\-().]+$/; // Allows digits, spaces, +, -, parentheses (), and full stops .
-    const digitCount = formData.telephone.replace(/[^\d]/g, '').length; // Counts only digits
+
+    const phoneRegex = /^[\d\s+\-().]+$/;
+    const digitCount = formData.telephone.replace(/[^\d]/g, '').length;
     
     if (!formData.telephone.trim()) {
       errors.telephone = 'Telephone Number is required.';
@@ -59,23 +73,32 @@ function FormCard({ onFormSubmit }) {
     if (!formData.email.trim()) {
       errors.email = 'Email Address is required.';
     }
-    // Customer Roll Number validation (must be 12 digits)
-    const rollNumberRegex = /^\d{12}$/; // Regex for exactly 12 digits
+
+    const rollNumberRegex = /^\d{12}$/;
     if (!formData.customerRoll.trim()) {
       errors.customerRoll = 'Customer Roll Number is required.';
     } else if (!rollNumberRegex.test(formData.customerRoll)) {
       errors.customerRoll = 'Customer Roll Number must be exactly 12 digits.';
     }
     if (!manualAddress.building_name_number?.trim() || !manualAddress.street?.trim()) {
-      errors.selectedAddress = 'You must select or enter an address.';
+      errors.selectedAddress = 'You must enter an address.';
     }
     if (!formData.agreeToPrivacy) {
       errors.agreeToPrivacy = 'You need to accept the privacy terms.';
     }
+    if (!country) {
+      errors.country = 'Country selection is required.';
+    }
+    if (!isValid(postcode)) {
+      errors.postcode = 'Please enter a valid postcode.';
+      setPostcodeError(true);
+    } else {
+      setPostcodeError(false);
+    }
+
     return errors;
   }
 
-  // Handle form submission
   function handleSubmit(e) {
     e.preventDefault();
     const errors = validateForm();
@@ -83,67 +106,22 @@ function FormCard({ onFormSubmit }) {
       setFormErrors(errors);
       return;
     }
-    // Replace selectedAddress with manualAddress in form submission
-    onFormSubmit({ ...formData, selectedAddress: manualAddress });
-  }
-
-  // Handle postcode search and address lookup
-  function searchAddress() {
-    const valid = isValid(postcode);
-
-    if (!valid) {
-      setPostcodeError(true);
-      return;
-    }
-
-    setPostcodeError(false); // Reset error if valid postcode
-
-    const requestData = {
-      postcode: postcode
-    };
-
-    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/get-addresses`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setAddresses(data.addresses);
-      })
-
-      .catch((error) => {
-        console.error('Error fetching addresses:', error);
-      });
-  }
-
-  // Select address from fetched addresses and save to manual input
-  function selectAddress(address) {
-    setManualAddress(address); // Populate the manual input with the selected address
-
-    // Clear the selectedAddress error when an address is selected
-    setFormErrors((prevErrors) => ({
-      ...prevErrors,
-      selectedAddress: '',
-    }));
+    onFormSubmit({
+      ...formData,
+      selectedAddress: {
+        ...manualAddress,
+        postcode: formatPostcode(postcode), // Format postcode before submitting
+        region: country
+      }
+    });
   }
 
   return (
     <div className="bg-primary-dark text-white p-7 rounded-lg max-w-6xl mx-auto mt-2 m-2">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Personal Information Column */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
-
-            {/* Full Name Input */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Full Name</label>
               <input
@@ -159,8 +137,6 @@ function FormCard({ onFormSubmit }) {
                 <p className="text-red-500 text-sm">{formErrors.fullName}</p>
               )}
             </div>
-
-            {/* Telephone Number Input */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Telephone Number</label>
               <input
@@ -176,8 +152,6 @@ function FormCard({ onFormSubmit }) {
                 <p className="text-red-500 text-sm">{formErrors.telephone}</p>
               )}
             </div>
-
-            {/* Email Address Input */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Email Address</label>
               <input
@@ -193,8 +167,6 @@ function FormCard({ onFormSubmit }) {
                 <p className="text-red-500 text-sm">{formErrors.email}</p>
               )}
             </div>
-
-            {/* Customer Roll Number Input */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Customer Roll Number</label>
               <input
@@ -216,105 +188,80 @@ function FormCard({ onFormSubmit }) {
             </div>
           </div>
 
-          {/* Property Information Column */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Property Information</h2>
-
-            {/* Postcode Search */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Postcode</label>
-              <div className="flex">
-                <input
-                  type="text"
-                  name="postcode"
-                  value={postcode}
-                  onChange={(e) => setPostcode(e.target.value)}
-                  className={`w-full p-2 rounded-l ${
-                    postcodeError ? 'input-border-error' : 'input-border'
-                  } bg-primary-dark text-white placeholder-gray-400`}
-                />
-                <button
-                  type="button"
-                  className="bg-white text-primary-dark p-2 rounded-r border border-white"
-                  onClick={searchAddress}
-                  disabled={postcode === ''}
-                >
-                  Search
-                </button>
-              </div>
+              <input
+                type="text"
+                name="postcode"
+                value={postcode}
+                onChange={(e) => setPostcode(e.target.value)}
+                autoComplete="off"
+                className={`w-full p-2 rounded ${
+                  postcodeError ? 'input-border-error' : 'input-border'
+                } bg-primary-dark text-white placeholder-gray-400`}
+              />
               {postcodeError && (
                 <p className="text-red-500 mt-2">Invalid postcode. Please enter a valid postcode.</p>
               )}
+            </div>
+            <div className="mt-3 mb-4">
+              <label className="block text-sm font-medium mb-2">Address</label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={manualAddress.building_name_number || ""}
+                  onChange={(e) =>
+                    setManualAddress({ ...manualAddress, building_name_number: e.target.value })
+                  }
+                  className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                  placeholder="Building Name/Number"
+                />
+                <input
+                  type="text"
+                  value={manualAddress.street || ""}
+                  onChange={(e) =>
+                    setManualAddress({ ...manualAddress, street: e.target.value })
+                  }
+                  className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                  placeholder="Street"
+                />
+                <input
+                  type="text"
+                  value={manualAddress.town || ""}
+                  onChange={(e) =>
+                    setManualAddress({ ...manualAddress, town: e.target.value })
+                  }
+                  className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
+                  placeholder="Town"
+                />
+              </div>
               {formErrors.selectedAddress && (!manualAddress.building_name_number?.trim() || !manualAddress.street?.trim()) && (
-                  <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
-                )}
+                <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
+              )}
             </div>
 
-            {/* Display list of addresses */}
-            {addresses.length > 0 && (
-              <div className="bg-primary-dark text-white p-4 rounded mt-2 max-h-40 overflow-y-auto border border-white">
-                {addresses.map((address, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => selectAddress(address)}
-                    className={`block w-full text-left p-2 mb-2 rounded ${
-                      manualAddress === address ? 'bg-white text-primary-dark' : 'bg-primary-dark text-white'
-                    } border border-white hover:bg-white hover:text-primary-dark`}
-                  >
-                    {address.building_name_number} {address.street}, {address.town}, {address.postcode}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Country</label>
+              <select
+                value={country}
+                onChange={handleCountryChange}
+                className={`w-full p-2 rounded border ${
+                  formErrors.country ? 'border-red-500' : 'border-white'
+                } bg-primary-dark text-white placeholder-gray-400`}
+              >
+                <option value="">Select a country</option>
+                <option value="England">England</option>
+                <option value="Scotland">Scotland</option>
+                <option value="Wales">Wales</option>
+                <option value="Northern Ireland">Northern Ireland</option>
+              </select>
+              {formErrors.country && (
+                <p className="text-red-500 text-sm mt-2">{formErrors.country}</p>
+              )}
+            </div>
 
-            {/* Manual Input for Address */}
-            {addresses.length > 0 && (
-              <div className="mt-3 mb-4">
-                <label className="block text-sm font-medium mb-2">Address</label>
-                <div className="flex space-x-2">
-                  {/* Input for Building Name/Number */}
-                  <input
-                    type="text"
-                    value={manualAddress.building_name_number || ""}
-                    onChange={(e) =>
-                      setManualAddress({ ...manualAddress, building_name_number: e.target.value })
-                    }
-                    className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
-                    placeholder="Building Name/Number"
-                  />
-
-                  {/* Input for Street */}
-                  <input
-                    type="text"
-                    value={manualAddress.street || ""}
-                    onChange={(e) =>
-                      setManualAddress({ ...manualAddress, street: e.target.value })
-                    }
-                    className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
-                    placeholder="Street"
-                  />
-
-                  {/* Display for Town */}
-                  <input
-                    type="text"
-                    value={manualAddress.town || ""}
-                    onChange={(e) =>
-                      setManualAddress({ ...manualAddress, town: e.target.value })
-                    }
-                    className="w-1/3 p-2 rounded border border-white bg-primary-dark text-white placeholder-gray-400"
-                    placeholder="Town"
-                  />
-                </div>
-
-                {/* Show the error below the manual input if no text is entered */}
-                {formErrors.selectedAddress && (!manualAddress.building_name_number?.trim() || !manualAddress.street?.trim()) && (
-                  <p className="text-red-500 text-sm mt-2">{formErrors.selectedAddress}</p>
-                )}
-              </div>
-            )}
-
-            {/* Privacy Checkbox */}
             <div className="mt-4 flex items-center">
               <input
                 type="checkbox"
@@ -322,7 +269,7 @@ function FormCard({ onFormSubmit }) {
                 id="agreeToPrivacy"
                 checked={formData.agreeToPrivacy}
                 onChange={handleChange}
-                className="hidden" // Hide the default checkbox
+                className="hidden"
               />
               <label
                 htmlFor="agreeToPrivacy"
@@ -353,7 +300,6 @@ function FormCard({ onFormSubmit }) {
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="text-right mt-4">
           <button
             type="submit"
