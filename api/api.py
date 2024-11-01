@@ -11,9 +11,10 @@ import esurv_db_manager as es
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
 
-static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
+#static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
+#app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
-app = Flask(__name__, static_folder=static_folder, static_url_path='')
+app = Flask(__name__)
 
 CORS(app)
 
@@ -94,6 +95,7 @@ def simulate_external():
     return """
     <a href="/?token=valid">Simulate External Request</a>
     """
+    
 """
 # Initial token validation and serving React app with GET request
 @app.route('/', defaults={'path': ''}, methods=['GET'])
