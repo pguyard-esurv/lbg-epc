@@ -45,6 +45,9 @@ RUN apt-get update && \
 # copy api files
 COPY ./api .
 
+# copy the React app's build files into the container
+COPY ../client/build /app/staticfiles
+
 EXPOSE 80
 
 CMD ["gunicorn", "-b", "0.0.0.0:80", "api:app"]
