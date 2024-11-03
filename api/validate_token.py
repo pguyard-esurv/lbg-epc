@@ -9,8 +9,6 @@ LBG_API_BASE_URL = os.getenv('LBG_API_BASE_URL')
 LBG_API_ENV = os.getenv('LBG_API_ENV')
 PROD_STATUS = os.getenv('PROD_STATUS')
 
-#from requests_toolbelt.utils import dump
-
 def validate_token(token):
     
     halifax_url = 'https://mortgages.secure.halifax-online.co.uk/homes/external-apis/sustainability/v1/epc/token'
@@ -38,9 +36,6 @@ def validate_token(token):
     data = {
         'token': token
     }
-    
-    if PROD_STATUS == 'dev':
-        return 'valid'
 
     try:
         response = requests.put(url, headers=headers, json=data, verify=False)

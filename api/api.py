@@ -1,9 +1,6 @@
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 from flask_cors import CORS
-from book_ehouse_job import book_ehouse_job
-from book_surveyhub_job import book_surveyhub_job
-from validate_token import validate_token
 import os
 from functools import wraps
 import esurv_db_manager as es
@@ -11,10 +8,19 @@ import esurv_db_manager as es
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
 
-#static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
-#app = Flask(__name__, static_folder=static_folder, static_url_path='')
+print(PROD_STATUS)
 
-app = Flask(__name__)
+if PROD_STATUS == 'dev':
+    from api.book_ehouse_job import book_ehouse_job
+    from api.book_surveyhub_job import book_surveyhub_job
+    from api.validate_token import validate_token
+else:
+    from book_ehouse_job import book_ehouse_job
+    from book_surveyhub_job import book_surveyhub_job
+    from validate_token import validate_token
+
+static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
+app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
 CORS(app)
 
@@ -60,9 +66,6 @@ def split_name(full_name):
         return "", parts[0]
     return " ".join(parts[:-1]), parts[-1]
 
-#def validate_token(token):
-#    return 'valid' if token == "xyz" else 'invalid'
-
 # Decorator for token validation
 def token_required(f):
     @wraps(f)
@@ -70,7 +73,6 @@ def token_required(f):
         token = request.args.get('token')
         validity = validate_token(token)
         print(validity)
-        print(PROD_STATUS)
         if not token or validate_token(token) not in ('valid', 'used'):
             return jsonify({"error": "Invalid token"}), 401
         return f(*args, **kwargs)
@@ -81,22 +83,12 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 # Routes
 
-@app.route('/', methods=['GET'])
-def index():
-    token = request.args.get('token')
-    if token:
-        validity = validate_token(token)
-        return f"{validity}"
-    else:
-        return "No Token."
-
 @app.route('/external-page')
 def simulate_external():
     return """
     <a href="/?token=valid">Simulate External Request</a>
     """
-    
-"""
+
 # Initial token validation and serving React app with GET request
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 @app.route('/<path:path>', methods=['GET'])
@@ -105,7 +97,6 @@ def serve_react(path):
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, 'index.html')
-"""
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
@@ -133,8 +124,6 @@ def submit_form():
         address = data['selectedAddress']
         region = address['region']
         
-        
-
         if region == 'Scotland':
             book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number)
             api_call = 'surveyhub'
