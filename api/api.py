@@ -88,7 +88,17 @@ def simulate_external():
     return """
     <a href="/?token=valid">Simulate External Request</a>
     """
+    
+@app.route('/', methods=['GET'])
+def index():
+    token = request.args.get('token')
+    if token:
+        validity = validate_token(token)
+        return f"{validity}"
+    else:
+        return "No Token."
 
+"""
 # Initial token validation and serving React app with GET request
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 @app.route('/<path:path>', methods=['GET'])
@@ -110,6 +120,8 @@ def serve_react(path):
     else:
         # If index.html is missing, display a custom error message
         return jsonify({"error": "The main page is unavailable. Please contact support."})
+
+"""
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
