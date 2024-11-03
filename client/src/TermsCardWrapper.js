@@ -39,10 +39,10 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
       alert("Please accept all terms by checking all the boxes before submitting.");
       return;
     }
-    if (!hasScrolledToBottom) {
-      alert("Please scroll to the bottom of the terms to confirm that you've read them.");
-      return;
-    }
+  // if (!hasScrolledToBottom) {
+  //   alert("Please scroll to the bottom of the terms to confirm that you've read them.");
+  //   return;
+  // }
     handleSubmit();
   };
 
