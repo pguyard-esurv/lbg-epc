@@ -46,12 +46,14 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
     handleSubmit();
   };
 
-  const handleScroll = () => {
-    const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
-    if (scrollTop + clientHeight >= scrollHeight) {
-      setHasScrolledToBottom(true);
-    }
-  };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setHasScrolledToBottom(entry.isIntersecting),
+      { root: contentRef.current, threshold: 1.0 }
+    );
+    observer.observe(contentRef.current.lastChild);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (submissionStatus === 'error') {
