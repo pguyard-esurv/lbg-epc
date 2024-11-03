@@ -5,7 +5,6 @@
 # Build pip requirements.
 FROM python:3.9.7-slim-buster as build-reqs
 
-# set work directory
 WORKDIR /app
 
 # set environment variables
@@ -15,6 +14,17 @@ ENV PYTHONUNBUFFERED 1
 # install dependencies
 COPY ./api/requirements.txt requirements.txt
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+
+###########
+# REACT BUILDER #
+###########
+
+# Use Node.js image to build React app
+FROM node:18 AS react-build
+
+WORKDIR /react-app
+COPY ./client /react-app
+RUN npm install && npm run build
 
 #########
 # FINAL #
@@ -28,7 +38,7 @@ WORKDIR /app
 # create the appropriate directories
 RUN mkdir /app/staticfiles
 
-# install dependencies
+# install Python dependencies
 COPY --from=build-reqs /app/wheels /wheels
 COPY --from=build-reqs /app/requirements.txt requirements.txt
 RUN pip install --no-cache /wheels/*
@@ -42,12 +52,13 @@ RUN apt-get update && \
     apt-get update && \
     ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
-# copy api files
+# copy API files
 COPY ./api .
 
-# copy the React app's build files into the container
-COPY ../client/build /app/staticfiles
+# copy built React app to staticfiles folder
+COPY --from=react-build /react-app/build /app/staticfiles
 
+# expose the port
 EXPOSE 80
 
 CMD ["gunicorn", "-b", "0.0.0.0:80", "api:app"]
