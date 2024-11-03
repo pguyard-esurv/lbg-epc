@@ -74,7 +74,7 @@ def token_required(f):
         validity = validate_token(token)
         print(validity)
         if not token or validate_token(token) not in ('valid', 'used'):
-            return jsonify({"error": "Invalid token"}), 401
+            return jsonify({"error": "Invalid token"})
         return f(*args, **kwargs)
     return decorated_function
 
@@ -90,13 +90,9 @@ def simulate_external():
     """
     
 @app.route('/', methods=['GET'])
+@token_required
 def index():
-    token = request.args.get('token')
-    if token:
-        validity = validate_token(token)
-        return f"{validity}"
-    else:
-        return "No Token."
+    return "Valid Token"
 
 """
 # Initial token validation and serving React app with GET request
