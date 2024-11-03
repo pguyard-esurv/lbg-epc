@@ -94,9 +94,22 @@ def simulate_external():
 @app.route('/<path:path>', methods=['GET'])
 @token_required
 def serve_react(path):
+    # Check if the requested file exists in the static folder
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, 'index.html')
+        file_path = os.path.join(app.static_folder, path)
+        if os.path.isfile(file_path):
+            return send_from_directory(app.static_folder, path)
+        else:
+            # If the file does not exist, display a custom message
+            return jsonify({"error": f"The requested file '{path}' was not found."})
+
+    # Default to serving index.html for any other route
+    index_path = os.path.join(app.static_folder, 'index.html')
+    if os.path.isfile(index_path):
+        return send_from_directory(app.static_folder, 'index.html')
+    else:
+        # If index.html is missing, display a custom error message
+        return jsonify({"error": "The main page is unavailable. Please contact support."})
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
