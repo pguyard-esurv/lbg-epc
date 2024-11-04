@@ -4,11 +4,15 @@ from flask_cors import CORS
 import os
 from functools import wraps
 import esurv_db_manager as es
+import sentry_sdk
 
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
+SENTRY_DSN = os.getenv('SENTRY_DSN')
 
-print(PROD_STATUS)
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
+)
 
 if PROD_STATUS == 'dev':
     from api.book_ehouse_job import book_ehouse_job
@@ -21,6 +25,7 @@ else:
 
 static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
+
 
 CORS(app)
 
@@ -148,6 +153,7 @@ def submit_form():
         return jsonify({"message": "Form data received successfully"}), 200
 
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         print(f"An error occurred: {e}")
         complete = -1
         log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
@@ -155,4 +161,4 @@ def submit_form():
         return jsonify({"error": error_message}), 400
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
