@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 import os
 from functools import wraps
@@ -74,7 +74,7 @@ def token_required(f):
         validity = validate_token(token)
         print(validity)
         if not token or validate_token(token) not in ('valid', 'used'):
-            return jsonify({"error": "Invalid token"})
+            return render_template('error.html', message='Invalid or missing token')
         return f(*args, **kwargs)
     return decorated_function
 
@@ -83,41 +83,30 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 # Routes
 
-@app.route('/external-page')
-def simulate_external():
-    return """
-    <a href="/?token=valid">Simulate External Request</a>
-    """
-    
-"""
-    
-@app.route('/', methods=['GET'])
-@token_required
-def index():
-    return "Valid Token"
+# Route to serve custom static files from the main API folder
+@app.route('/api-static/<path:filename>')
+def serve_api_static(filename):
+    return send_from_directory(os.path.dirname(__file__), filename)
 
-"""
-# Initial token validation and serving React app with GET request
+# Route to serve React app and ensure correct file paths
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 @app.route('/<path:path>', methods=['GET'])
 @token_required
 def serve_react(path):
-    # Check if the requested file exists in the static folder
+    # Serve React static files or index.html
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
         file_path = os.path.join(app.static_folder, path)
         if os.path.isfile(file_path):
             return send_from_directory(app.static_folder, path)
         else:
-            # If the file does not exist, display a custom message
-            return jsonify({"error": f"The requested file '{path}' was not found."})
+            return jsonify({"error": f"The requested file '{path}' was not found."}), 404
 
-    # Default to serving index.html for any other route
+    # Serve index.html as a fallback
     index_path = os.path.join(app.static_folder, 'index.html')
     if os.path.isfile(index_path):
         return send_from_directory(app.static_folder, 'index.html')
     else:
-        # If index.html is missing, display a custom error message
-        return jsonify({"error": "The main page is unavailable. Please contact support."})
+        return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
