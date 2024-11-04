@@ -1,0 +1,29 @@
+<!-- templates/error.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <header class="text-white p-4" style="background-color: #0c2538;">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Logo and Link -->
+            <a href="https://www.esurv.co.uk/" target="_blank" rel="noopener noreferrer" class="flex items-center">
+                <img src="{{ url_for('serve_api_static', filename='esurv-logo.png') }}" alt="Logo" class="h-10 mr-4">
+            </a>
+        </div>
+    </header>
+
+    <!-- Error Message Rectangle -->
+    <main class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md text-center p-8 rounded-lg shadow-md" style="background-color: #0c2538;">
+            <h1 class="text-3xl font-bold" style="color: #e3008c;">Error</h1>
+            <p class="text-white mt-4">Sorry, the token supplied by Lloyds Banking Group is invalid; please refer to LBG's latest instructions.</p>
+        </div>
+    </main>
+</body>
+</html>

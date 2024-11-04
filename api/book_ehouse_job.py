@@ -99,6 +99,7 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
     if response.status_code == 401:
         ehouse_access_token = get_ehouse_token()
         response = send_book_ehouse_job_request(street_address, postcode, town, name, email_address, phone_number, key_invoice_item_id, ehouse_access_token)
+
         if response.status_code != 200:
             raise Exception(response.json())
         #poss: send sentry email saying that the token is bad

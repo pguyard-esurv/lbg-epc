@@ -2,7 +2,7 @@ import React from 'react';
 import './index.css';
 
 function InfoCard() {
-  const titleLeft = 'Book your free energy performance certificate';
+  const titleLeft = 'Book your free energy performance certificate!';
   const titleRightText = 'Learn more about e.surv';
   const descriptionPart1 = "Booking your Energy Performance Certificate couldn't be easier. Simply provide your details and we will arrange for a Domestic Energy Assessor to complete your free EPC. Please complete the form below to get started.";
 

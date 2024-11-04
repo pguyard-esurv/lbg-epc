@@ -61,27 +61,9 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
-        
-def test_sh_auth_api():
-        
-    headers = {
-    'accept': '*/*',
-    'X-API-KEY': SH_API_KEY,
-    }
-    
-    SH_API_BASE_URL = 'https://esurv.surveyhublive.net/externalapi/'
-    
-    url = SH_API_BASE_URL + 'api/test/AuthTest'
-
-    response = requests.get(url=url, headers=headers)
-    
-    return response
+        return e
 
 """
-
-response = test_sh_auth_api()
-print(response.status_code)
-
 
 house_number = '123'
 street = 'Place St.'
