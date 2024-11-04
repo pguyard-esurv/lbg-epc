@@ -61,6 +61,7 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
+        return e
 
 """
 

@@ -63,9 +63,9 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
   }, []);
 
   useEffect(() => {
-    if (submissionStatus === 'error') {
-      alert("There was an error processing your request, please try again.");
-      window.location.href = '/';
+    if (submissionStatus && submissionStatus === 'error') {
+      alert(`There was an error processing your request: ${submissionStatus}`);
+      window.location.reload(); // Reloads the current page
     }
   }, [submissionStatus]);
 

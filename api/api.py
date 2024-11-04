@@ -162,7 +162,8 @@ def submit_form():
         print(f"An error occurred: {e}")
         complete = -1
         log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
-        return jsonify({"error": "Failed to process form data"}), 400
+        error_message = str(e)
+        return jsonify({"error": error_message}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
