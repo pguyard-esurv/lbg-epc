@@ -75,7 +75,6 @@ def split_name(full_name):
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        1/0
         token = request.args.get('token')
         validity = validate_token(token)
         print(validity)
