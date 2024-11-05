@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import os
 from functools import wraps
 import esurv_db_manager as es
@@ -29,6 +31,19 @@ app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
 CORS(app)
 
+app.config.update(
+    SQLALCHEMY_DATABASE_URI=app.config.get('DATABASE_URI'),
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+)
+
+# Initialize the database connection
+db = SQLAlchemy(app)
+
+# Enable Flask-Migrate commands "flask db init/migrate/upgrade" to work
+migrate = Migrate(app, db)
+
+# The import must be done after db initialization due to circular import issue
+from models import LBG_EPC_SUBMISSION
 # Helper functions
 
 # Mock function - replace with DB call
@@ -138,6 +153,15 @@ def submit_form():
         phone_number = data['telephone']
         address = data['selectedAddress']
         region = address['region']
+
+        submission = LBG_EPC_SUBMISSION()
+        submission.address = address
+        submission.email_address = email_address
+        submission.full_name = full_name
+        submission.region = region
+
+        db.session.add(submission)
+        db.session.commit(submission)
         
         if region == 'Scotland':
             book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number)
