@@ -5,6 +5,8 @@ import os
 from functools import wraps
 import esurv_db_manager as es
 import sentry_sdk
+import random
+import psycopg2
 
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
@@ -85,36 +87,19 @@ def token_required(f):
 
 def log_epc_submission(full_name, email_address, phone_number, address, api_call, complete):
     print(full_name, email_address, phone_number, address, api_call, complete)
-
-# Routes
-
-"""
-
-@app.route('/')
-def index():
-    response1 = sh_api_test()
-    response2 = sh_api_auth_test()
-    response = str((response1.status_code, response2.status_code))
-    print(response)
     
-    full_name = 'john smith'
-    email_address = 'name@domain.com'
-    phone_number = '07444155435'
-    street_address = '1234567 street'
-    postcode = 'W8 7QG'
-    town = 'townsville'
+    # Generate a unique 6-digit z_ref starting with 9
+    z_ref = random.randint(900000, 999999)
 
-    book_ehouse_job(street_address, postcode, town, full_name, email_address, phone_number)
+    # Connect to the database
+    cnx = psycopg2.connect(
+        user="psqladmin",
+        password=os.getenv('DB_PASSWORD'),
+        host="10.180.10.132",
+        port=5432,
+        database="postgres"
+    )
 
-    
-    return response
-
-"""
-@app.route('/')
-def index():
-    import psycopg2
-    cnx = psycopg2.connect(user="psqladmin", password=os.getenv('DB_PASSWORD'), host="10.180.10.132", port=5432, database="postgres")
-    
     # Create a cursor
     cursor = cnx.cursor()
 
@@ -127,14 +112,14 @@ def index():
 
     # Define the data to insert
     data = (
-        12345,  # z_ref
-        "John Doe",  # full_name
-        "johndoe@example.com",  # email_address
-        "123-456-7890",  # phone_number
-        "123 Main St, Anytown, USA",  # address
-        "API_CALL_EXAMPLE",  # api_call
-        b"signature_byte_data_here",  # signature_data as binary data
-        1  # complete
+        z_ref,  # z_ref
+        full_name,  # full_name
+        email_address,  # email_address
+        phone_number,  # phone_number
+        address,  # address
+        api_call,  # api_call
+        b"",  # signature_data as binary data (update if signature data is available)
+        complete  # complete
     )
 
     try:
@@ -143,7 +128,7 @@ def index():
         
         # Commit the transaction
         cnx.commit()
-        print("Data inserted successfully.")
+        print("Data inserted successfully with z_ref:", z_ref)
 
     except Exception as e:
         print("An error occurred:", e)
@@ -153,9 +138,9 @@ def index():
         # Close the cursor and connection
         cursor.close()
         cnx.close()
-    return "success"
 
-"""
+# Routes
+
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
     if not request.is_json:
@@ -228,8 +213,6 @@ def serve_react(path):
         return send_from_directory(app.static_folder, 'index.html')
     else:
         return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
-
-"""
 
 if __name__ == "__main__":
     app.run()
