@@ -96,6 +96,17 @@ def index():
     response2 = sh_api_auth_test()
     response = str((response1.status_code, response2.status_code))
     print(response)
+    
+    full_name = 'john smith'
+    email_address = 'name@domain.com'
+    phone_number = '07444155435'
+    street_address = '1234567 street'
+    postcode = 'W8 7QG'
+    town = 'townsville'
+
+    book_ehouse_job(street_address, postcode, town, full_name, email_address, phone_number)
+
+    
     return response
 
 """

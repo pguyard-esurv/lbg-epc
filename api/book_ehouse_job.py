@@ -142,6 +142,7 @@ def delete_all_ehouse_orders():
     print(f'there are {response["totalOrders"]} orders to delete')
     order_list = response['orderList']
 
+#delete_all_ehouse_orders()
 
 """
 
