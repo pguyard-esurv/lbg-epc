@@ -217,10 +217,10 @@ class EPC_DB(DatabaseBase):
 
     def connect(self):
         # server = 'ES-HBO-03'
-        server = "psql-lbgepc-prd-uks-01"
+        server = "psql-lbgepc-prd-uks-01.postgres.database.azure.com"
         database = "postgres"
         username = "psqladmin"
-        password = self.env["EPC_DB_PROD_PASSWORD"]
+        password = os.getenv('DB_PASSWORD')
         driver_version = "PostgreSQL UNICODE(x64)"
         driver = f"{driver_version};SERVER={server};DATABASE={database};UID={username};PWD={password};SSLmode=allow"
         #driver_version = self.env[f"SH_DB_DRIVER"]

@@ -112,10 +112,8 @@ def index():
 """
 @app.route('/')
 def index():
-    from esurv_db_manager import EPC_DB
-    pg_db = EPC_DB()
-    pg_conn = pg_db.connect()
-    pg_db.disconnect()
+    import psycopg2
+    cnx = psycopg2.connect(user="psqladmin", password=os.getenv('DB_PASSWORD'), host="psql-lbgepc-prd-uks-01.postgres.database.azure.com", port=5432, database="postgres")
     return "success"
 
 """
