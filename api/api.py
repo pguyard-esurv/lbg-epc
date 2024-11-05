@@ -110,31 +110,6 @@ def index():
     return response
 
 """
-# Route to serve custom static files from the main API folder
-@app.route('/api-static/<path:filename>')
-def serve_api_static(filename):
-    return send_from_directory(os.path.dirname(__file__), filename)
-
-# Route to serve React app and ensure correct file paths
-@app.route('/', defaults={'path': ''}, methods=['GET'])
-@app.route('/<path:path>', methods=['GET'])
-@token_required
-def serve_react(path):
-    # Serve React static files or index.html
-    if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
-        file_path = os.path.join(app.static_folder, path)
-        if os.path.isfile(file_path):
-            return send_from_directory(app.static_folder, path)
-        else:
-            return jsonify({"error": f"The requested file '{path}' was not found."}), 404
-
-    # Serve index.html as a fallback
-    index_path = os.path.join(app.static_folder, 'index.html')
-    if os.path.isfile(index_path):
-        return send_from_directory(app.static_folder, 'index.html')
-    else:
-        return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
-
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
@@ -182,6 +157,32 @@ def submit_form():
         log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
         error_message = str(e)
         return jsonify({"error": error_message}), 400
+
+
+# Route to serve custom static files from the main API folder
+@app.route('/api-static/<path:filename>')
+def serve_api_static(filename):
+    return send_from_directory(os.path.dirname(__file__), filename)
+
+# Route to serve React app and ensure correct file paths
+@app.route('/', defaults={'path': ''}, methods=['GET'])
+@app.route('/<path:path>', methods=['GET'])
+@token_required
+def serve_react(path):
+    # Serve React static files or index.html
+    if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
+        file_path = os.path.join(app.static_folder, path)
+        if os.path.isfile(file_path):
+            return send_from_directory(app.static_folder, path)
+        else:
+            return jsonify({"error": f"The requested file '{path}' was not found."}), 404
+
+    # Serve index.html as a fallback
+    index_path = os.path.join(app.static_folder, 'index.html')
+    if os.path.isfile(index_path):
+        return send_from_directory(app.static_folder, 'index.html')
+    else:
+        return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
 
 if __name__ == "__main__":
     app.run()
