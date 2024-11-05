@@ -167,7 +167,7 @@ def serve_api_static(filename):
 # Route to serve React app and ensure correct file paths
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 @app.route('/<path:path>', methods=['GET'])
-@token_required
+#@token_required
 def serve_react(path):
     # Serve React static files or index.html
     if path and (path.startswith("static/") or path.endswith((".js", ".css"))):
