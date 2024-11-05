@@ -5,7 +5,7 @@ import TermsCardWrapper from './TermsCardWrapper';
 
 async function submitResponseData(responseData) {
 
-  const backendUrl = 'https://lbg-epc.esurv.co.uk/api/submit-form';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://lbg-epc.esurv.co.uk/api/submit-form';
 
   const response = await fetch(backendUrl, {
     method: 'POST',
