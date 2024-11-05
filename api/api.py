@@ -88,7 +88,7 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 # Routes
 
-
+"""
 
 @app.route('/')
 def index():
@@ -135,7 +135,6 @@ def serve_react(path):
     else:
         return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
 
-"""
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
