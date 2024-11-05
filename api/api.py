@@ -113,7 +113,7 @@ def index():
 @app.route('/')
 def index():
     import psycopg2
-    #cnx = psycopg2.connect(user="psqladmin", password=os.getenv('DB_PASSWORD'), host="10.180.10.132", port=5432, database="postgres")
+    cnx = psycopg2.connect(user="psqladmin", password=os.getenv('DB_PASSWORD'), host="10.180.10.132", port=5432, database="postgres")
     return "success"
 
 """

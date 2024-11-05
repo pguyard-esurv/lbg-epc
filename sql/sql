@@ -1,12 +1,11 @@
-// for reference - these will not be the final values
-
 CREATE TABLE lbg_epc_complete(
     date timestamp with time zone default now(),
-    job_id text PRIMARY KEY,
-    agreement_ref text,
-    failed_check text,
-    client_name text,
-    new_product_type text,
-    rectify_reason text, 
+    z_ref int PRIMARY KEY,
+    full_name text,
+    email_address text,
+    phone_number text,
+    address text,
+    api_call text,
+    signature_data BYTEA,
     complete int DEFAULT -1
 );
