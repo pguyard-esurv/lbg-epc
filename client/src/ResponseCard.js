@@ -5,7 +5,7 @@ import TermsCardWrapper from './TermsCardWrapper';
 
 async function submitResponseData(responseData) {
 
-  const backendUrl = 'https://wa-lbgepc-prd.azurewebsites.net//api/submit-form';
+  const backendUrl = 'https://wa-lbgepc-prd.azurewebsites.net/api/submit-form';
 
   const response = await fetch(backendUrl, {
     method: 'POST',
