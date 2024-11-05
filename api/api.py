@@ -110,7 +110,15 @@ def index():
     return response
 
 """
+@app.route('/')
+def index():
+    from esurv_db_manager import EPC_DB
+    pg_db = EPC_DB()
+    pg_conn = pg_db.connect()
+    pg_db.disconnect()
+    return "success"
 
+"""
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
     if not request.is_json:
@@ -183,6 +191,8 @@ def serve_react(path):
         return send_from_directory(app.static_folder, 'index.html')
     else:
         return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
+
+"""
 
 if __name__ == "__main__":
     app.run()
