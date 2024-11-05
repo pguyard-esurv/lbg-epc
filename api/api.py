@@ -114,6 +114,45 @@ def index():
 def index():
     import psycopg2
     cnx = psycopg2.connect(user="psqladmin", password=os.getenv('DB_PASSWORD'), host="10.180.10.132", port=5432, database="postgres")
+    
+    # Create a cursor
+    cursor = cnx.cursor()
+
+    # Define the SQL INSERT query with placeholders
+    query = """
+        INSERT INTO lbg_epc_complete (
+            z_ref, full_name, email_address, phone_number, address, api_call, signature_data, complete
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+    """
+
+    # Define the data to insert
+    data = (
+        12345,  # z_ref
+        "John Doe",  # full_name
+        "johndoe@example.com",  # email_address
+        "123-456-7890",  # phone_number
+        "123 Main St, Anytown, USA",  # address
+        "API_CALL_EXAMPLE",  # api_call
+        b"signature_byte_data_here",  # signature_data as binary data
+        1  # complete
+    )
+
+    try:
+        # Execute the query with the data
+        cursor.execute(query, data)
+        
+        # Commit the transaction
+        cnx.commit()
+        print("Data inserted successfully.")
+
+    except Exception as e:
+        print("An error occurred:", e)
+        cnx.rollback()  # Roll back the transaction in case of error
+
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        cnx.close()
     return "success"
 
 """
