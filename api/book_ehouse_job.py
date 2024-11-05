@@ -141,14 +141,15 @@ def delete_all_ehouse_orders():
     response = json.loads(response.text)
     print(f'there are {response["totalOrders"]} orders to delete')
     order_list = response['orderList']
-    
+
+
+"""
 
 #delete_all_ehouse_orders()
 response = delete_ehouse_order('8620495')
 print(response.text)
 #delete_all_ehouse_orders()
 
-"""
 
 street_address = '12345 Place St'
 postcode = 'W8 7QG'

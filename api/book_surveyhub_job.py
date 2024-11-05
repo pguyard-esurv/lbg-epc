@@ -63,6 +63,29 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
         print(f"An error occurred: {e}")
         return e
 
+def sh_api_test():
+    headers = {
+    'accept': '*/*',
+    }
+    
+    url = SH_API_BASE_URL + 'api/test'
+
+    response = requests.get(url=url, headers=headers)
+    return response
+
+def sh_api_auth_test():
+    headers = {
+    'accept': '*/*',
+    'X-API-KEY': SH_API_KEY,
+    }
+
+    url = SH_API_BASE_URL + 'api/test/AuthTest'
+
+    response = requests.get(url=url, headers=headers)
+    return response
+
+
+
 """
 
 house_number = '123'

@@ -16,11 +16,11 @@ sentry_sdk.init(
 
 if PROD_STATUS == 'dev':
     from api.book_ehouse_job import book_ehouse_job
-    from api.book_surveyhub_job import book_surveyhub_job
+    from api.book_surveyhub_job import book_surveyhub_job, sh_api_auth_test, sh_api_test
     from api.validate_token import validate_token
 else:
     from book_ehouse_job import book_ehouse_job
-    from book_surveyhub_job import book_surveyhub_job
+    from book_surveyhub_job import book_surveyhub_job, sh_api_auth_test, sh_api_test
     from validate_token import validate_token
 
 static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
@@ -88,6 +88,17 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
 # Routes
 
+
+
+@app.route('/')
+def index():
+    response1 = sh_api_test()
+    response2 = sh_api_auth_test()
+    response = str((response1.status_code, response2.status_code))
+    print(response)
+    return response
+
+"""
 # Route to serve custom static files from the main API folder
 @app.route('/api-static/<path:filename>')
 def serve_api_static(filename):
@@ -112,6 +123,8 @@ def serve_react(path):
         return send_from_directory(app.static_folder, 'index.html')
     else:
         return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
+
+"""
 
 @app.route('/api/get-addresses', methods=['POST'])
 def get_addresses():
