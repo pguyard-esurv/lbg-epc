@@ -37,11 +37,11 @@ function ResponseCard({ responseData }) {
       if (response.ok) {
         setSubmissionStatus('success');
       } else {
-        setSubmissionStatus('error');
+        setSubmissionStatus(response);
         Sentry.captureMessage("Response submission returned a non-OK status");
       }
     } catch (error) {
-      setSubmissionStatus('error');
+      setSubmissionStatus(error);
       Sentry.captureException(error); // This logs the error to Sentry
     }
   };
