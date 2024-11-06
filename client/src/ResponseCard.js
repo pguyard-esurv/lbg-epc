@@ -4,8 +4,7 @@ import ThankYou from './ThankYou';
 import TermsCardWrapper from './TermsCardWrapper';
 
 async function submitResponseData(responseData) {
-
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://lbg-epc.esurv.co.uk/api/submit-form';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL + 'api/submit-form' || 'https://lbg-epc.esurv.co.uk/api/submit-form';
 
   const response = await fetch(backendUrl, {
     method: 'POST',
@@ -21,10 +20,17 @@ async function submitResponseData(responseData) {
 function ResponseCard({ responseData }) {
   const [submissionStatus, setSubmissionStatus] = useState(null); // null, 'pending', 'success', or 'error'
 
-  const handleSubmit = async () => {
+  // handleSubmit now accepts full submission data from TermsCardWrapper
+  const handleSubmit = async (additionalData) => {
     setSubmissionStatus('pending');
     try {
-      const response = await submitResponseData(responseData);
+      // Merge responseData with additionalData from TermsCardWrapper
+      const completeData = {
+        ...responseData,
+        ...additionalData, // Data from TermsCardWrapper passed up through onSubmit
+      };
+
+      const response = await submitResponseData(completeData);
 
       if (response.ok) {
         setSubmissionStatus('success');
@@ -36,22 +42,15 @@ function ResponseCard({ responseData }) {
     }
   };
 
-
   if (submissionStatus === 'success') {
     return <ThankYou />;
   }
 
-
-
-
-
   return (
-    <TermsCardWrapper handleSubmit={handleSubmit} submissionStatus={submissionStatus}>
+    <TermsCardWrapper onSubmit={handleSubmit} submissionStatus={submissionStatus}>
       <Terms />
     </TermsCardWrapper>
   );
-
-
 }
 
 export default ResponseCard;

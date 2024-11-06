@@ -85,8 +85,7 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def log_epc_submission(full_name, email_address, phone_number, address, api_call, complete):
-    print(full_name, email_address, phone_number, address, api_call, complete)
+def log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete):
     
     # Generate a unique 6-digit z_ref starting with 9
     z_ref = random.randint(900000, 999999)
@@ -106,37 +105,31 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
     # Define the SQL INSERT query with placeholders
     query = """
         INSERT INTO lbg_epc_complete (
-            z_ref, full_name, email_address, phone_number, address, api_call, signature_data, complete
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+            z_ref, full_name, email_address, phone_number, address, api_call, signature_data, todays_date, complete
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
     """
-
-    # Define the data to insert
+    
     data = (
-        z_ref,  # z_ref
-        full_name,  # full_name
-        email_address,  # email_address
-        phone_number,  # phone_number
-        str(address),  # address
-        api_call,  # api_call
-        b"",  # signature_data as binary data (update if signature data is available)
-        complete  # complete
+        z_ref,
+        full_name,
+        email_address,
+        phone_number,
+        str(address),
+        api_call,
+        f"{signature}".encode('utf-8') ,
+        date,
+        complete
     )
 
     try:
-        # Execute the query with the data
         cursor.execute(query, data)
-        
-        # Commit the transaction
         cnx.commit()
-        print("Data inserted successfully with z_ref:", z_ref)
 
     except Exception as e:
         print("An error occurred:", e)
         sentry_sdk.capture_exception(e)
-        #cnx.rollback()  # Roll back the transaction in case of error
 
     finally:
-        # Close the cursor and connection
         cursor.close()
         cnx.close()
 
@@ -161,6 +154,10 @@ def submit_form():
     complete = -1
     try:
         data = request.get_json()
+        signature = data['signature']
+        date = data['date']
+        print(type(signature))
+        print(type(date))
         full_name = data['fullName']
         first_name, last_name = split_name(full_name)
         email_address = data['email']
@@ -177,7 +174,8 @@ def submit_form():
             api_call = 'ehouse'
             
         complete = 1
-        log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
+        if PROD_STATUS == 'prod':
+            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete)
 
         return jsonify({"message": "Form data received successfully"}), 200
 
@@ -185,7 +183,8 @@ def submit_form():
         sentry_sdk.capture_exception(e)
         print(f"An error occurred: {e}")
         complete = -1
-        log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
+        if PROD_STATUS == 'prod':
+            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete)
         error_message = str(e)
         return jsonify({"error": error_message}), 400
 

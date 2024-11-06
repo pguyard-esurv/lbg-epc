@@ -7,5 +7,6 @@ CREATE TABLE lbg_epc_complete(
     address text,
     api_call text,
     signature_data BYTEA,
+    todays_date timestamp,
     complete int DEFAULT -1
 );

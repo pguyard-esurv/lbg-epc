@@ -3,7 +3,7 @@ import SignatureCanvas from "react-signature-canvas";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
+function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
   const sigCanvasRef = useRef(null);
   const contentRef = useRef(null);
   const [startDate, setStartDate] = useState(new Date());
@@ -17,10 +17,12 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
   });
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
+  // Clear the signature canvas
   const clearSignature = () => {
     sigCanvasRef.current.clear();
   };
 
+  // Handle checkbox changes
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
     setCheckboxes((prevState) => ({
@@ -29,23 +31,34 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
     }));
   };
 
+  // Collect and submit form data
   const handleSubmission = () => {
     if (sigCanvasRef.current.isEmpty()) {
       alert("Please sign in the signature block and accept all terms before submitting.");
       return;
     }
+
     const allChecked = Object.values(checkboxes).every(Boolean);
     if (!allChecked) {
       alert("Please accept all terms by checking all the boxes before submitting.");
       return;
     }
-  // if (!hasScrolledToBottom) {
-  //   alert("Please scroll to the bottom of the terms to confirm that you've read them.");
-  //   return;
-  // }
-    handleSubmit();
+
+    // Extract the signature data URL
+    const signatureDataURL = sigCanvasRef.current.toDataURL('image/png');
+
+    // Collect all form data
+    const submissionData = {
+      signature: signatureDataURL,
+      date: startDate,
+      checkboxes: checkboxes,
+    };
+
+    // Call the onSubmit prop function with the collected data
+    onSubmit(submissionData);
   };
 
+  // Scroll handling for the content section
   const handleScroll = () => {
     const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
     if (scrollTop + clientHeight >= scrollHeight) {
@@ -53,6 +66,7 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
     }
   };
 
+  // Set up IntersectionObserver to track scrolling to the bottom
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setHasScrolledToBottom(entry.isIntersecting),
@@ -62,23 +76,24 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
     return () => observer.disconnect();
   }, []);
 
+  // Display an error if submission fails
   useEffect(() => {
     if (submissionStatus && submissionStatus === 'error') {
       alert(`There was an error processing your request: ${submissionStatus}`);
-      window.location.reload(); // Reloads the current page
+      window.location.reload();
     }
   }, [submissionStatus]);
 
   return (
     <>
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="max-w-8xl w-full"> {/* Increased width */}
+        <div className="max-w-8xl w-full">
           <div className="bg-white rounded-lg p-8">
             
-            {/* Scrollable Content Section with increased height */}
+            {/* Scrollable Content Section */}
             <div
               ref={contentRef}
-              className="overflow-y-auto max-h-96 border p-4" // Increased max-height
+              className="overflow-y-auto max-h-96 border p-4"
               onScroll={handleScroll}
             >
               {children}
@@ -90,6 +105,7 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
               Please click the checkboxes and sign below to confirm acceptance and understanding of the Terms and Conditions.
             </p>
 
+            {/* Checkbox Section */}
             <div className="mt-4 space-y-4">
               <div className="flex items-start">
                 <input
@@ -103,6 +119,7 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
                   I have read, understand, and accept the "Description of Service" and the contract terms and confirm that the Property to be assessed is the residential property at the address stated in the e.surv Limited web page to which these Terms and Conditions are linked.
                 </label>
               </div>
+
               <div className="flex items-start">
                 <input
                   type="checkbox"
@@ -112,9 +129,10 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
                   className="mt-1"
                 />
                 <label htmlFor="commenceWork" className="ml-2">
-                  I authorise e.surv Limited (including its subcontractors) to immediately commence work on arranging the EPC, and I accept that once the EPC has been provided to me, I will lose my right to cancel during the 14-day "cooling off" period (as provided by the Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013).
+                  I authorize e.surv Limited (including its subcontractors) to immediately commence work on arranging the EPC, and I accept that once the EPC has been provided to me, I will lose my right to cancel during the 14-day "cooling off" period (as provided by the Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013).
                 </label>
               </div>
+
               <div className="flex items-start">
                 <input
                   type="checkbox"
@@ -127,6 +145,7 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
                   I accept that e.surv Limited will be paid by Lloyds Bank Plc in connection with this transaction.
                 </label>
               </div>
+
               <div className="flex items-start">
                 <input
                   type="checkbox"
@@ -136,14 +155,14 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
                   className="mt-1"
                 />
                 <label htmlFor="dataProcessing" className="ml-2">
-                  I authorise e.surv Limited to process my personal data in accordance with these terms.
+                  I authorize e.surv Limited to process my personal data in accordance with these terms.
                 </label>
               </div>
             </div>
 
-            {/* Signature and Buttons */}
+            {/* Signature and Button Section */}
             <div className="flex flex-col lg:flex-row justify-end items-start gap-4 mt-6">
-              {/* Signature Canvas with responsive width */}
+              {/* Signature Canvas */}
               <div className="border-2 border-gray-300 rounded p-2 w-full lg:w-[500px]">
                 <SignatureCanvas
                   ref={sigCanvasRef}
@@ -153,7 +172,7 @@ function TermsCardWrapper({ children, handleSubmit, submissionStatus }) {
               </div>
 
               {/* Button Section */}
-              <div className="flex flex-col gap-2 mt-4 lg:mt-0"> {/* Stack on mobile, row on large screens */}
+              <div className="flex flex-col gap-2 mt-4 lg:mt-0">
                 <button
                   type="button"
                   onClick={handleSubmission}
