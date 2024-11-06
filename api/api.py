@@ -150,7 +150,7 @@ def get_addresses():
 
 @app.route('/api/submit-form', methods=['POST'])
 def submit_form():
-    full_name, email_address, phone_number, address, api_call, signature = [''] * 6
+    full_name, email_address, phone_number, address, api_call, signature, date = [''] * 7
     complete = -1
     try:
         data = request.get_json()
