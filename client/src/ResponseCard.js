@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Terms from './Terms';
 import ThankYou from './ThankYou';
 import TermsCardWrapper from './TermsCardWrapper';
+import * as Sentry from "@sentry/react";
 
 async function submitResponseData(responseData) {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://lbg-epc.esurv.co.uk/';
@@ -26,10 +27,9 @@ function ResponseCard({ responseData }) {
   const handleSubmit = async (additionalData) => {
     setSubmissionStatus('pending');
     try {
-      // Merge responseData with additionalData from TermsCardWrapper
       const completeData = {
         ...responseData,
-        ...additionalData, // Data from TermsCardWrapper passed up through onSubmit
+        ...additionalData,
       };
 
       const response = await submitResponseData(completeData);
@@ -38,9 +38,11 @@ function ResponseCard({ responseData }) {
         setSubmissionStatus('success');
       } else {
         setSubmissionStatus('error');
+        Sentry.captureMessage("Response submission returned a non-OK status");
       }
     } catch (error) {
       setSubmissionStatus('error');
+      Sentry.captureException(error); // This logs the error to Sentry
     }
   };
 
