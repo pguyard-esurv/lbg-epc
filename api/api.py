@@ -132,7 +132,8 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
 
     except Exception as e:
         print("An error occurred:", e)
-        cnx.rollback()  # Roll back the transaction in case of error
+        sentry_sdk.capture_exception(e)
+        #cnx.rollback()  # Roll back the transaction in case of error
 
     finally:
         # Close the cursor and connection
