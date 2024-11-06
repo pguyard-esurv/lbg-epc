@@ -154,10 +154,18 @@ def submit_form():
     full_name, email_address, phone_number, address, api_call, signature = [''] * 6
     date = datetime.now()
     complete = -1
+
+    try:
+        signature = data['signature']
+    except:
+        signature = ''
+    try:
+        date = data['date']
+    except:
+        date = datetime.now()
+
     try:
         data = request.get_json()
-        signature = data['signature'] or ''
-        date = data['date'] or datetime.now()
         full_name = data['fullName']
         first_name, last_name = split_name(full_name)
         email_address = data['email']
