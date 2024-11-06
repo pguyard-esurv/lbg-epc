@@ -116,7 +116,7 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
         full_name,  # full_name
         email_address,  # email_address
         phone_number,  # phone_number
-        address,  # address
+        str(address),  # address
         api_call,  # api_call
         b"",  # signature_data as binary data (update if signature data is available)
         complete  # complete
