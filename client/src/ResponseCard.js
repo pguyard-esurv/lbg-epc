@@ -5,6 +5,8 @@ import TermsCardWrapper from './TermsCardWrapper';
 import * as Sentry from "@sentry/react";
 
 async function submitResponseData(responseData) {
+
+  try {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://lbg-epc.esurv.co.uk/';
 
   const backendApiUrl = backendUrl + 'api/submit-form' 
@@ -18,6 +20,9 @@ async function submitResponseData(responseData) {
   });
 
   return response;
+} catch (error) {
+  Sentry.captureException(error);
+}
 }
 
 function ResponseCard({ responseData }) {
@@ -42,7 +47,7 @@ function ResponseCard({ responseData }) {
       }
     } catch (error) {
       setSubmissionStatus(error);
-      Sentry.captureException(error); // This logs the error to Sentry
+      Sentry.captureException(error);
     }
   };
 
