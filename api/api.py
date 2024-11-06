@@ -7,6 +7,7 @@ import esurv_db_manager as es
 import sentry_sdk
 import random
 import psycopg2
+from datetime import datetime
 
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
@@ -150,7 +151,8 @@ def get_addresses():
 
 @app.route('/api/submit-form', methods=['POST'])
 def submit_form():
-    full_name, email_address, phone_number, address, api_call, signature, date = [''] * 7
+    full_name, email_address, phone_number, address, api_call, signature = [''] * 6
+    date = datetime.now()
     complete = -1
     try:
         data = request.get_json()
