@@ -150,11 +150,11 @@ def get_addresses():
 
 @app.route('/api/submit-form', methods=['POST'])
 def submit_form():
-    full_name, email_address, phone_number, address, api_call = [''] * 5
+    full_name, email_address, phone_number, address, api_call, signature = [''] * 6
     complete = -1
     try:
         data = request.get_json()
-        signature = data['signature'] or ''
+        signature = data['signature']
         date = data['date']
         full_name = data['fullName']
         first_name, last_name = split_name(full_name)
