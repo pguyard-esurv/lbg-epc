@@ -34,7 +34,7 @@ function ResponseCard({ responseData }) {
     try {
       const completeData = {
         ...responseData,
-        ...additionalData,
+        //...additionalData,
       };
 
       const response = await submitResponseData(completeData);
