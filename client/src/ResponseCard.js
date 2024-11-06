@@ -4,9 +4,11 @@ import ThankYou from './ThankYou';
 import TermsCardWrapper from './TermsCardWrapper';
 
 async function submitResponseData(responseData) {
-  const backendUrl = process.env.REACT_APP_BACKEND_URL + 'api/submit-form' || 'https://lbg-epc.esurv.co.uk/api/submit-form';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://lbg-epc.esurv.co.uk/';
 
-  const response = await fetch(backendUrl, {
+  const backendApiUrl = backendUrl + 'api/submit-form' 
+
+  const response = await fetch(backendApiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -156,8 +156,6 @@ def submit_form():
         data = request.get_json()
         signature = data['signature']
         date = data['date']
-        print(type(signature))
-        print(type(date))
         full_name = data['fullName']
         first_name, last_name = split_name(full_name)
         email_address = data['email']
