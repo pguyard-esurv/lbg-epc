@@ -154,7 +154,7 @@ def submit_form():
     complete = -1
     try:
         data = request.get_json()
-        signature = data['signature']
+        signature = data['signature'] or ''
         date = data['date']
         full_name = data['fullName']
         first_name, last_name = split_name(full_name)
