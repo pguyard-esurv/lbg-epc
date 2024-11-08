@@ -46,10 +46,11 @@ function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
 
     // Extract the signature data URL
     const signatureDataURL = sigCanvasRef.current.toDataURL('image/png');
+    const cleanedSignatureData = signatureDataURL.replace(/^data:image\/png;base64,/, "");
 
     // Collect all form data
     const submissionData = {
-      signature: signatureDataURL,
+      signature: cleanedSignatureData,
       date: startDate,
       checkboxes: checkboxes,
     };

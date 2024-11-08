@@ -8,6 +8,7 @@ import sentry_sdk
 import random
 import psycopg2
 from datetime import datetime
+import json
 
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
@@ -141,7 +142,9 @@ def get_addresses():
     if not request.is_json:
         return jsonify({"error": "Invalid content type, expecting JSON"}), 400
     
-    data = request.get_json()
+    data = request.data
+    data = json.loads(data)
+    
     postcode = data.get('postcode')
     if not postcode:
         return jsonify({"error": "Missing postcode"}), 400
@@ -154,6 +157,10 @@ def submit_form():
     full_name, email_address, phone_number, address, api_call, signature = [''] * 6
     date = datetime.now()
     complete = -1
+
+    
+    data = request.get_json()
+    
 
     try:
         signature = data['signature']
