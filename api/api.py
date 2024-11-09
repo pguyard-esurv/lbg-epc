@@ -196,7 +196,6 @@ response.headers['Strict-Transport-Security'] = 'max-age=16070400; includeSubDom
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Cache-Control'] = 'no-cache, no-store'
-    return response    response.headers['Cache-Control'] = 'no-cache, no-store'
     return response
 
 if __name__ == "__main__":
