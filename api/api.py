@@ -163,16 +163,12 @@ def submit_form():
         db.session.add(submission)
         db.session.commit(submission)
         
-        if region == 'Scotland':
-            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number)
-            api_call = 'surveyhub'
-        else:
+        book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number)
+        log_epc_submission(full_name, email_address, phone_number, address, api_call='surveyhub', complete=1)
+        if region != 'Scotland':
             street_address = f"{address['building_name_number']} {address['street']}"
             book_ehouse_job(street_address, address['postcode'], address['town'], full_name, email_address, phone_number)
-            api_call = 'ehouse'
-            
-        complete = 1
-        log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
+            log_epc_submission(full_name, email_address, phone_number, address, api_call='ehouse', complete=1)
 
         return jsonify({"message": "Form data received successfully"}), 200
 
