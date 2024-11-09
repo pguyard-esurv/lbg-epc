@@ -28,8 +28,14 @@ else:
 static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
+# Specify the allowed origins
+allowed_origins = [
+    "https://www.lbg.com",  # LBG website
+    "http://localhost:3000",
+]
 
-CORS(app)
+# Apply CORS settings to your app
+CORS(app, origins=allowed_origins)
 
 app.config.update(
     SQLALCHEMY_DATABASE_URI=app.config.get('DATABASE_URI'),
