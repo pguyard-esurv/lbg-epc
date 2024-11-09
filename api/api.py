@@ -186,5 +186,18 @@ def submit_form():
         error_message = str(e)
         return jsonify({"error": error_message}), 400
 
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=16070400; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+response.headers['Strict-Transport-Security'] = 'max-age=16070400; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Cache-Control'] = 'no-cache, no-store'
+    return response    response.headers['Cache-Control'] = 'no-cache, no-store'
+    return response
+
 if __name__ == "__main__":
     app.run()
