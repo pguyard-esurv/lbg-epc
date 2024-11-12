@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, send_from_directory, render_template, make_response
 from flask_cors import CORS
 import os
 from functools import wraps
@@ -13,6 +13,8 @@ import json
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
 SENTRY_DSN = os.getenv('SENTRY_DSN')
+BACKEND_URL = os.getenv('BACKEND_URL')
+LBG_URL = os.getenv('LBG_URL')
 
 sentry_sdk.init(
     dsn=SENTRY_DSN,
@@ -30,8 +32,12 @@ else:
 static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
+allowed_origins = [
+    f"{LBG_URL}",
+    f"{BACKEND_URL}",
+]
 
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
 # Helper functions
 
@@ -75,16 +81,27 @@ def split_name(full_name):
         return "", parts[0]
     return " ".join(parts[:-1]), parts[-1]
 
-# Decorator for token validation
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.args.get('token')
+        
+        if request.cookies.get('token_validated') == 'true':
+            return f(*args, **kwargs)
+
         validity = validate_token(token)
+        print('*' * 15)
+        print('validation API called - validity is:')
         print(validity)
-        if not token or validate_token(token) not in ('valid', 'used'):
+        print('*' * 15)
+        
+        if not token or validity != 'valid':
             return render_template('error.html', message='Invalid or missing token')
-        return f(*args, **kwargs)
+
+        response = make_response(f(*args, **kwargs))
+        response.set_cookie('token_validated', 'true', httponly=True, samesite='Strict')
+        
+        return response
     return decorated_function
 
 def log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete):
@@ -152,8 +169,16 @@ def get_addresses():
     addresses = get_addresses_from_db(postcode)
     return jsonify({"addresses": addresses}), 200
 
-@app.route('/api/submit-form', methods=['POST'])
+@app.route('/api/submit-form', methods=['OPTIONS', 'POST'])
 def submit_form():
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = ', '.join(allowed_origins)
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, sentry-trace, baggage'
+        return response
+    
     full_name, email_address, phone_number, address, api_call, signature = [''] * 6
     date = datetime.now()
     complete = -1
@@ -228,6 +253,21 @@ def serve_react(path):
         return send_from_directory(app.static_folder, 'index.html')
     else:
         return jsonify({"error": "The main page is unavailable. Please contact support."}), 404
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=16070400; includeSubDomains'
+    response.headers['Content-Security-Policy'] = (
+    f"default-src 'self' {BACKEND_URL}; "
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+    "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
+    "worker-src 'self' blob:; "
+    f"connect-src 'self' {BACKEND_URL} https://o4506784279298048.ingest.us.sentry.io; "
+    )
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Cache-Control'] = 'no-cache, no-store'
+    return response
 
 if __name__ == "__main__":
     app.run()
