@@ -28,8 +28,16 @@ else:
 static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
+# Specify the allowed origins
+BACKEND_URL = os.getenv('BACKEND_URL')
+LBG_URL = os.getenv('LBG_URL')
+allowed_origins = [
+    f"{LBG_URL}",
+    f"{BACKEND_URL}",
+]
 
-CORS(app)
+# Apply CORS settings to your app
+CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
 app.config.update(
     SQLALCHEMY_DATABASE_URI=app.config.get('DATABASE_URI'),
@@ -141,8 +149,16 @@ def get_addresses():
     addresses = get_addresses_from_db(postcode)
     return jsonify({"addresses": addresses}), 200
 
-@app.route('/api/submit-form', methods=['POST'])
+@app.route('/api/submit-form', methods=['OPTIONS', 'POST'])
 def submit_form():
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = ', '.join(allowed_origins)
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, sentry-trace, baggage'
+        return response
+
     full_name, email_address, phone_number, address, api_call = [''] * 5
     complete = -1
     try:
@@ -179,6 +195,21 @@ def submit_form():
         log_epc_submission(full_name, email_address, phone_number, address, api_call, complete)
         error_message = str(e)
         return jsonify({"error": error_message}), 400
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=16070400; includeSubDomains'
+    response.headers['Content-Security-Policy'] = (
+      f"default-src 'self' {BACKEND_URL}; "
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+      "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
+      "worker-src 'self' blob:; "
+      f"connect-src 'self' {BACKEND_URL} https://o4506784279298048.ingest.us.sentry.io; "
+      )
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Cache-Control'] = 'no-cache, no-store'
+    return response
 
 if __name__ == "__main__":
     app.run()
