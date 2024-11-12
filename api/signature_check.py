@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import base64
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -24,17 +25,23 @@ try:
     print("Connected to the PostgreSQL database successfully!")
 
     cursor = connection.cursor()
-    cursor.execute("select signature_data from lbg_epc_complete where z_ref='908112';")
-
-    # Fetch the memoryview object and convert it to bytes
+    cursor.execute("SELECT signature_data FROM lbg_epc_complete WHERE z_ref='908112';")
+    
+    # Fetch the data
     hex_data = cursor.fetchone()[0]
     if isinstance(hex_data, memoryview):
         hex_data = hex_data.tobytes()
-
-    # Assuming `hex_data` is the raw PNG binary data, save it directly
-    with open("output_image.png", "wb") as file:
-        file.write(hex_data)
-
+    
+    # Decode the bytes to a string (if necessary)
+    base64_data = hex_data.decode('utf-8')
+    
+    # Decode the base64 data
+    image_data = base64.b64decode(base64_data)
+    
+    # Save the binary data to a PNG file
+    with open('output_image.png', 'wb') as f:
+        f.write(image_data)
+    
     print("Image saved as output_image.png")
 
     # Close the cursor and connection
@@ -42,5 +49,5 @@ try:
     connection.close()
 
 except Exception as e:
-    print("Failed to connect to the PostgreSQL database.")
+    print("Failed to connect to the PostgreSQL database or process data.")
     print("Error:", e)
