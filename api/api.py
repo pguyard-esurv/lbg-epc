@@ -104,12 +104,11 @@ def token_required(f):
         return response
     return decorated_function
 
-def log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete):
-    
-    # Generate a unique 6-digit z_ref starting with 9
-    z_ref = random.randint(900000, 999999)
+import psycopg2
+import os
+import sentry_sdk
 
-    # Connect to the database
+def log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete):
     cnx = psycopg2.connect(
         user="psqladmin",
         password=os.getenv('DB_PASSWORD'),
@@ -118,29 +117,32 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
         database="postgres"
     )
 
-    # Create a cursor
     cursor = cnx.cursor()
 
-    # Define the SQL INSERT query with placeholders
-    query = """
-        INSERT INTO lbg_epc_complete (
-            z_ref, full_name, email_address, phone_number, address, api_call, signature_data, todays_date, complete
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
-    """
-    
-    data = (
-        z_ref,
-        full_name,
-        email_address,
-        phone_number,
-        str(address),
-        api_call,
-        f"{signature}".encode('utf-8') ,
-        date,
-        complete
-    )
-
     try:
+        cursor.execute("SELECT MAX(z_ref) FROM lbg_epc_complete;")
+        result = cursor.fetchone()
+        latest_z_ref = result[0]
+        z_ref = 900000 if latest_z_ref is None else latest_z_ref + 1
+
+        query = """
+            INSERT INTO lbg_epc_complete (
+                z_ref, full_name, email_address, phone_number, address, api_call, signature_data, todays_date, complete
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """
+
+        data = (
+            z_ref,
+            full_name,
+            email_address,
+            phone_number,
+            str(address),
+            api_call,
+            f"{signature}".encode('utf-8'),
+            date,
+            complete
+        )
+        
         cursor.execute(query, data)
         cnx.commit()
 
