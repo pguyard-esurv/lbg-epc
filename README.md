@@ -12,28 +12,7 @@ After the terms are accepted, the customer information is passed to the back end
 
 The back end then records the customer information in a Postgres database.
 
-# Getting started 
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-<p>The below code composes the project using a dockerfile which builds the React front end and then serves them up using a Flask server.</p>
-
-```docker
-docker build -f Dockerfile.combo -t react-flask-app .
-```
-> There are multiple Dockerfile in the directory (client only, api only, etc) so we specify the -f flag followed by the file name 
-
->-t flag is the tag of the docker image by default this is react-flask-app but should be renamed appropriately to reflect your image. 
-
-<p>Once the container is built, it should be run using</p>
-
-```docker
-docker run --rm -p 3000:3000 react-flask-app
-```
-
->The --rm flag instructs docker to clean up the container and remove system files upon container exit. Omit this flag when debugging to be able to see final state of container 
-
->The -p flag is the port the container is running, the left hand port is the docker host port and the right most port is the exposed port on the container. This needs to match the port being run as part of the flask server in the Dockerfile itself, by default this is 3000 on both. 
+# Development 
 
 
 # External API Auth
@@ -81,4 +60,66 @@ You can also log into the ehouse portal, if you want to add/view orders manually
 
 # Database
 
+The logging database for the web app is a Postgres database (psql-lbgepc-prd-uks-01) hosted on Azure alongside the web app. The logs for completed jobs are found on the data table lbg_epc_complete.
+
+To run psql, from DEV-RPALINUX-01 enter:
+
+```
+psql "host=10.180.10.132 port=5432 dbname=postgres user=psqladmin"
+```
+
+You will then be prompted for the password.
+
+The address and signature data can be quite large fields, so the following can be a useful query:
+
+
+    SELECT
+        date, z_ref, full_name, phone_number, api_call, todays_date, complete,
+        CASE
+            WHEN signature_data IS NULL OR signature_data = '' THEN 'Empty'
+            ELSE 'Has Data'
+        END AS signature_data_status,
+        CASE
+            WHEN address IS NULL OR address = '' THEN 'Empty'
+            ELSE 'Has Data'
+        END AS address_status
+    FROM
+        lbg_epc_complete;
+
+In order to extract a signature (in case of audit etc), from DEV-RPALINUX-01 enter:
+
+    python3 api/signature_check.py <z_ref>
+
+The signature will be downloaded from the database as a png in the format api/<z_ref>_signature.png
+
+In lieu of other methods, the repo can be pulled to your local machine to access the png file.
+
 # Deployment
+
+The site is deployed as an Azure web app.
+
+Resource group: rg-lbgepc-prd-uks-01
+Web app: wa-lbgepc-prd
+
+The URL for the site is https://lbg-epc.esurv.co.uk/ but the site cannot be accessed without a token provided by LBG in the format https://lbg-epc.esurv.co.uk/?token=
+
+To update the app:
+
+DEV-RPALINUX-01 is being used as a staging area (Repos/lbg-epc)
+
+Push the latest copy to the repo, then run the following commands:
+
+    docker build -t epc -f Dockerfile.prod .
+    docker image tag epc azacresurv.azurecr.io/lbg-epc:latest
+    docker login azacresurv.azurecr.io
+    docker push azacresurv.azurecr.io/lbg-epc:latest
+
+Then restart the app in Azure (you will likely need to be given permissions for the resource group, as well as an az_admin account if you don't have one yet).
+
+# Future considerations
+
+Email RPA
+
+Z references
+
+ehouse SSL certificate
