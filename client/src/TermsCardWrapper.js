@@ -103,7 +103,7 @@ function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
             {/* Confirmation Section */}
             <h2 className="text-xl font-bold mt-6">Confirmation of Instruction</h2>
             <p className="mt-2">
-              Please click the checkboxes and sign below to confirm acceptance and understanding of the Terms and Conditions.
+            Please click the checkboxes and sign below to confirm acceptance and understanding of the Terms and Conditions.
             </p>
 
             {/* Checkbox Section */}
@@ -117,7 +117,7 @@ function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
                   className="mt-1"
                 />
                 <label htmlFor="acceptTerms" className="ml-2">
-                  I have read, understand, and accept the "Description of Service" and the contract terms and confirm that the Property to be assessed is the residential property at the address stated in the e.surv Limited web page to which these Terms and Conditions are linked.
+                I have read, understand and accept the contract terms and conditions and confirm that the Property to be assessed is the residential property at the address stated in the e.surv Limited web page to which these Terms and Conditions are linked.
                 </label>
               </div>
 
@@ -130,7 +130,7 @@ function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
                   className="mt-1"
                 />
                 <label htmlFor="commenceWork" className="ml-2">
-                  I authorize e.surv Limited (including its subcontractors) to immediately commence work on arranging the EPC, and I accept that once the EPC has been provided to me, I will lose my right to cancel during the 14-day "cooling off" period (as provided by the Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013).
+                I authorise e.surv Limited (including its subcontractors) to immediately commence work on arranging the EPC, and I accept that once the EPC has been provided to me, I will lose my right to cancel during the 14 day "cooling off" period (as provided by the Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013).
                 </label>
               </div>
 
@@ -143,7 +143,7 @@ function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
                   className="mt-1"
                 />
                 <label htmlFor="paymentAcceptance" className="ml-2">
-                  I accept that e.surv Limited will be paid by Lloyds Bank Plc in connection with this transaction.
+                I accept that e.surv Limited will be paid by Lloyds Banking Group in connection with this transaction. 
                 </label>
               </div>
 
@@ -156,9 +156,12 @@ function TermsCardWrapper({ children, onSubmit, submissionStatus }) {
                   className="mt-1"
                 />
                 <label htmlFor="dataProcessing" className="ml-2">
-                  I authorize e.surv Limited to process my personal data in accordance with these terms.
+                I authorise e.surv Limited to process my personal data in accordance with these terms. 
                 </label>
               </div>
+
+              <p>Please e-sign and date this document:</p>
+
             </div>
 
             {/* Signature and Button Section */}

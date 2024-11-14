@@ -101,6 +101,7 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
         response = send_book_ehouse_job_request(street_address, postcode, town, name, email_address, phone_number, key_invoice_item_id, ehouse_access_token)
 
         if response.status_code != 200:
+            print('ehouse api request successfully sent')
             raise Exception(response.json())
         #poss: send sentry email saying that the token is bad
     
@@ -141,24 +142,3 @@ def delete_all_ehouse_orders():
     response = json.loads(response.text)
     print(f'there are {response["totalOrders"]} orders to delete')
     order_list = response['orderList']
-
-#delete_all_ehouse_orders()
-
-"""
-
-#delete_all_ehouse_orders()
-response = delete_ehouse_order('8620495')
-print(response.text)
-#delete_all_ehouse_orders()
-
-
-street_address = '12345 Place St'
-postcode = 'W8 7QG'
-town = 'Gardenfield'
-name = 'First Last'
-email_address = 'name@domain.com'
-phone_number = '07 123 456 789'
-
-book_ehouse_job(street_address, postcode, town, name, email_address, phone_number)
-
-"""

@@ -183,7 +183,7 @@ function FormCard({ onFormSubmit }) {
                 <p className="text-red-500 text-sm">{formErrors.customerRoll}</p>
               )}
               <p className="text-xs text-gray-400 mt-1">
-                This will be a 12-digit number, starting with either 1 for Halifax and 4 for Lloyds
+                This will be a 12-digit number
               </p>
             </div>
           </div>

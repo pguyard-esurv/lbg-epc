@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 SH_API_KEY = os.getenv('SH_API_KEY')
 SH_API_BASE_URL = os.getenv('SH_API_BASE_URL')
+PROD_STATUS = os.getenv('PROD_STATUS')
 
-def book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number):
+def book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number, z_ref):
     
     url = SH_API_BASE_URL + 'api/job'
 
@@ -17,7 +18,10 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
             'X-API-KEY': SH_API_KEY,
         }
         
-        instruction_ref = 900012
+        if PROD_STATUS == 'dev':
+            instruction_ref = 999999
+        else:
+            instruction_ref = z_ref
         
         data = {
             "instructionRef": instruction_ref,
@@ -99,6 +103,8 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
             headers=headers,
             data=json_data,
         )
+        
+        print(f'surveyhub api response {response.status_code}')
 
         return response
 
@@ -126,20 +132,3 @@ def sh_api_auth_test():
 
     response = requests.get(url=url, headers=headers)
     return response
-
-
-"""
-
-house_number = '123456789012345'
-street = 'Street Place.'
-postcode = 'W8 7QG'
-first_name = 'First'
-last_name = 'Last'
-email_address = 'name@domain.com'
-phone_number = '07 123 456 789'
-
-response = book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number)
-print(response.status_code)
-print(response.json())
-
-"""

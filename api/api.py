@@ -3,12 +3,13 @@ from flask import Flask, request, jsonify, send_from_directory, render_template,
 from flask_cors import CORS
 import os
 from functools import wraps
-import esurv_db_manager as es
 import sentry_sdk
-import random
 import psycopg2
 from datetime import datetime
 import json
+import psycopg2
+import os
+import sentry_sdk
 
 load_dotenv()
 PROD_STATUS = os.getenv('PROD_STATUS')
@@ -22,11 +23,11 @@ sentry_sdk.init(
 
 if PROD_STATUS == 'dev':
     from api.book_ehouse_job import book_ehouse_job
-    from api.book_surveyhub_job import book_surveyhub_job, sh_api_auth_test, sh_api_test
+    from api.book_surveyhub_job import book_surveyhub_job
     from api.validate_token import validate_token
 else:
     from book_ehouse_job import book_ehouse_job
-    from book_surveyhub_job import book_surveyhub_job, sh_api_auth_test, sh_api_test
+    from book_surveyhub_job import book_surveyhub_job
     from validate_token import validate_token
 
 static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' else 'staticfiles'
@@ -104,11 +105,33 @@ def token_required(f):
         return response
     return decorated_function
 
-import psycopg2
-import os
-import sentry_sdk
+def get_z_ref():
+    try:
+        cnx = psycopg2.connect(
+            user="psqladmin",
+            password=os.getenv('DB_PASSWORD'),
+            host="10.180.10.132",
+            port=5432,
+            database="postgres"
+        )
+        cursor = cnx.cursor()
+        cursor.execute("SELECT MAX(z_ref) FROM lbg_epc_complete;")
+        result = cursor.fetchone()
+        latest_z_ref = result[0]
+        z_ref = 900000 if latest_z_ref is None else latest_z_ref + 1
+        cursor.close()
+        cnx.close()
+        return z_ref
 
-def log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete):
+    except Exception as e:
+        print("An error occurred:", e)
+        sentry_sdk.capture_exception(e)
+        if cursor:
+            cursor.close()
+        if cnx:
+            cnx.close()
+
+def log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref):
     cnx = psycopg2.connect(
         user="psqladmin",
         password=os.getenv('DB_PASSWORD'),
@@ -120,10 +143,6 @@ def log_epc_submission(full_name, email_address, phone_number, address, api_call
     cursor = cnx.cursor()
 
     try:
-        cursor.execute("SELECT MAX(z_ref) FROM lbg_epc_complete;")
-        result = cursor.fetchone()
-        latest_z_ref = result[0]
-        z_ref = 900000 if latest_z_ref is None else latest_z_ref + 1
 
         query = """
             INSERT INTO lbg_epc_complete (
@@ -188,7 +207,6 @@ def submit_form():
     
     data = request.get_json()
     
-
     try:
         signature = data['signature']
     except:
@@ -207,17 +225,20 @@ def submit_form():
         address = data['selectedAddress']
         region = address['region']
         
+        z_ref = get_z_ref() if PROD_STATUS == 'prod' else None
+        
         if region == 'Scotland':
-            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number)
+            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number, z_ref)
             api_call = 'surveyhub'
         else:
+            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number, z_ref)
             street_address = f"{address['building_name_number']} {address['street']}"
             book_ehouse_job(street_address, address['postcode'], address['town'], full_name, email_address, phone_number)
             api_call = 'ehouse'
             
         complete = 1
         if PROD_STATUS == 'prod':
-            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete)
+            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
 
         return jsonify({"message": "Form data received successfully"}), 200
 
@@ -226,7 +247,7 @@ def submit_form():
         print(f"An error occurred: {e}")
         complete = -1
         if PROD_STATUS == 'prod':
-            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete)
+            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
         error_message = str(e)
         return jsonify({"error": error_message}), 400
 
