@@ -37,7 +37,8 @@ allowed_origins = [
     f"{os.getenv('LBG_URL')}",
     f"{os.getenv('BACKEND_URL')}",
     'http://localhost:3000',
-    'http://127.0.0.1:5000'
+    'http://127.0.0.1:5000',
+    'wa-lbgepc-prd.azurewebsites.net'
 ]
 
 
@@ -91,18 +92,26 @@ def token_required(f):
     def decorated_function(*args, **kwargs):
         token = request.args.get('token')
         
+        # If the token is already validated in cookies, proceed
         if request.cookies.get('token_validated') == 'true':
             return f(*args, **kwargs)
 
+        # If no token is provided, return an error
+        if not token:
+            return render_template('error.html')
+
+        # Call the validation API only if a token is provided
         validity = validate_token(token)
         print('*' * 15)
-        print('validation API called - validity is:')
+        print('Validation API called - validity is:')
         print(validity)
         print('*' * 15)
         
-        if not token or validity != 'valid':
-            return render_template('error.html', message='Invalid or missing token')
+        # Check the validity of the token
+        if validity != 'valid':
+            return render_template('error.html')
 
+        # Set a cookie to indicate the token has been validated
         response = make_response(f(*args, **kwargs))
         response.set_cookie('token_validated', 'true', httponly=True, samesite='Strict')
         
