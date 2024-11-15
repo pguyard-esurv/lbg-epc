@@ -38,7 +38,8 @@ allowed_origins = [
     f"{os.getenv('BACKEND_URL')}",
     'http://localhost:3000',
     'http://127.0.0.1:5000',
-    'wa-lbgepc-prd.azurewebsites.net'
+    'wa-lbgepc-prd.azurewebsites.net',
+    'https://lbg-epc.esurv.co.uk'
 ]
 
 
