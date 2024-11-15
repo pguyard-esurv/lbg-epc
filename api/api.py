@@ -36,14 +36,10 @@ app = Flask(__name__, static_folder=static_folder, static_url_path='')
 allowed_origins = [
     f"{os.getenv('LBG_URL')}",
     f"{os.getenv('BACKEND_URL')}",
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://127.0.0.1:5000'
 ]
 
-def get_origin_from_request():
-    origin = request.headers.get('Origin')
-    if origin in allowed_origins:
-        return origin
-    return None
 
 
 CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
