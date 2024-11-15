@@ -34,9 +34,17 @@ static_folder = os.path.join('..', 'client', 'build') if PROD_STATUS == 'dev' el
 app = Flask(__name__, static_folder=static_folder, static_url_path='')
 
 allowed_origins = [
-    f"{LBG_URL}",
-    f"{BACKEND_URL}",
+    f"{os.getenv('LBG_URL')}",
+    f"{os.getenv('BACKEND_URL')}",
+    'http://localhost:3000'
 ]
+
+def get_origin_from_request():
+    origin = request.headers.get('Origin')
+    if origin in allowed_origins:
+        return origin
+    return None
+
 
 CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
 
@@ -192,64 +200,94 @@ def get_addresses():
 
 @app.route('/api/submit-form', methods=['OPTIONS', 'POST'])
 def submit_form():
+    # Helper function to get a valid origin from the request
+    def get_origin_from_request():
+        origin = request.headers.get('Origin')
+        if origin in allowed_origins:
+            return origin
+        return None
+
     if request.method == 'OPTIONS':
         # Handle preflight request
-        response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = ', '.join(allowed_origins)
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, sentry-trace, baggage'
-        return response
-    
-    full_name, email_address, phone_number, address, api_call, signature = [''] * 6
-    date = datetime.now()
-    complete = -1
+        origin = get_origin_from_request()
+        if origin:
+            response = make_response()
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, sentry-trace, baggage'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response
+        return make_response(jsonify({"error": "CORS origin not allowed"}), 403)
 
-    
-    data = request.get_json()
-    
-    try:
-        signature = data['signature']
-    except:
-        signature = ''
-    try:
-        date = data['date']
-    except:
+    if request.method == 'POST':
+        origin = get_origin_from_request()
+        if not origin:
+            return jsonify({"error": "CORS origin not allowed"}), 403
+
+        # Set the default response values
+        full_name, email_address, phone_number, address, api_call, signature = [''] * 6
         date = datetime.now()
-
-    try:
-        data = request.get_json()
-        full_name = data['fullName']
-        first_name, last_name = split_name(full_name)
-        email_address = data['email']
-        phone_number = data['telephone']
-        address = data['selectedAddress']
-        region = address['region']
-        
-        z_ref = get_z_ref() if PROD_STATUS == 'prod' else None
-        
-        if region == 'Scotland':
-            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number, z_ref)
-            api_call = 'surveyhub'
-        else:
-            book_surveyhub_job(address['building_name_number'], address['street'], address['postcode'], first_name, last_name, email_address, phone_number, z_ref)
-            street_address = f"{address['building_name_number']} {address['street']}"
-            book_ehouse_job(street_address, address['postcode'], address['town'], full_name, email_address, phone_number)
-            api_call = 'ehouse'
-            
-        complete = 1
-        if PROD_STATUS == 'prod':
-            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
-
-        return jsonify({"message": "Form data received successfully"}), 200
-
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        print(f"An error occurred: {e}")
         complete = -1
-        if PROD_STATUS == 'prod':
-            log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
-        error_message = str(e)
-        return jsonify({"error": error_message}), 400
+
+        try:
+            # Parse JSON request data
+            data = request.get_json()
+            full_name = data.get('fullName', '')
+            first_name, last_name = split_name(full_name)
+            email_address = data.get('email', '')
+            phone_number = data.get('telephone', '')
+            address = data.get('selectedAddress', {})
+            region = address.get('region', '')
+            signature = data.get('signature', '')
+            date = data.get('date', datetime.now())
+
+            # Generate z_ref for logging if in production
+            z_ref = get_z_ref() if PROD_STATUS == 'prod' else None
+
+            # Process based on region
+            if region == 'Scotland':
+                book_surveyhub_job(
+                    address.get('building_name_number', ''),
+                    address.get('street', ''),
+                    address.get('postcode', ''),
+                    first_name,
+                    last_name,
+                    email_address,
+                    phone_number,
+                    z_ref
+                )
+                api_call = 'surveyhub'
+            else:
+                street_address = f"{address.get('building_name_number', '')} {address.get('street', '')}"
+                book_ehouse_job(
+                    street_address,
+                    address.get('postcode', ''),
+                    address.get('town', ''),
+                    full_name,
+                    email_address,
+                    phone_number
+                )
+                api_call = 'ehouse'
+
+            # Mark submission as complete and log in production
+            complete = 1
+            if PROD_STATUS == 'prod':
+                log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
+
+            response = jsonify({"message": "Form data received successfully"})
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response, 200
+
+        except Exception as e:
+            # Handle exceptions, log errors, and return a response
+            sentry_sdk.capture_exception(e)
+            print(f"An error occurred: {e}")
+            complete = -1
+            if PROD_STATUS == 'prod':
+                log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
+            return jsonify({"error": str(e)}), 400
+
 
 
 # Route to serve custom static files from the main API folder

@@ -60,10 +60,39 @@ function Terms() {
           limitations to e.surv’s liability are set out in clause 12 below.
         </p>
 
+        <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-gray-50">
+  <p className="mb-4">
+    The Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013 say that in most cases, you can cancel within 14 days. If you agree the services will start within this time, you may be charged for what you’ve used.
+  </p>
+  <p className="mb-4">
+    The Consumer Rights Act 2015 says:
+  </p>
+  <ul className="list-disc pl-6 mb-4">
+    <li>
+      You can ask us to repeat or fix a service if it’s not carried out with reasonable care and skill, or get some money back if we can’t fix it.
+    </li>
+    <li>
+      If a price hasn’t been agreed upfront, what you’re asked to pay must be reasonable.
+    </li>
+    <li>
+      If a time hasn’t been agreed upfront, it must be carried out within a reasonable time.
+    </li>
+  </ul>
+  <p className="mb-4">
+    This is a summary of some of your key rights. For detailed information from Citizens Advice please visit
+    <a href="https://www.citizensadvice.org.uk" className="text-blue-500 underline" target="_blank" rel="noopener noreferrer">
+      www.citizensadvice.org.uk
+    </a> or call 03454 04 05 06 (or, in Scotland, visit Citizens Advice Scotland or call 0800 028 1456).
+  </p>
+  <p className="text-sm text-gray-600">
+    The information in this summary box summarises some of your key rights. It is not intended to replace the contract below, which you should read carefully.
+  </p>
+</div>
+
         <h3 className="font-bold mt-6">2. Description of Service</h3>
         <br></br>
-        <p>2.1 We will use reasonable care and skill to:</p>
-        <ol type="a" className="list-disc ml-6">
+        <p>2.1 We will use reasonable care and skill to: </p>
+        <ol className="list-[lower-alpha] ml-6">
           <li>
             Where applicable, pass Your details to Our subcontractor and/or their agents.
           </li>
@@ -131,7 +160,7 @@ function Terms() {
           <br></br>
           <p>
             4.2 You confirm that You have the authority to:
-            <ol type="a" className="list-disc ml-8">
+            <ol className="list-[lower-alpha] ml-6">
               <li>
                 provide Us with the data needed to carry out the energy assessment; and
               </li>
@@ -334,7 +363,7 @@ function Terms() {
           detailed information on Your rights and what You should expect from Us, please:
         </p>
         <br></br>
-        <ol type="a" className="list-disc ml-6">
+        <ol start="g" className="list-[lower-alpha] ml-6">
           <li>
             speak with Our representative by calling the number set out in the Introduction section of this
             contract.
@@ -398,7 +427,7 @@ function Terms() {
         <br></br>
         <p>15.3 We will use the personal information You provide to Us:</p>
         <br></br>
-        <ol type="i" className="list-disc ml-6">
+        <ol className="list-[lower-roman] ml-6">
           <li>
             to prepare and supply the EPC to You, including arranging a DEA visit to the Property (this may
             entail passing your data to our subcontractors); and
