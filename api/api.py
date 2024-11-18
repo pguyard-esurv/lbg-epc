@@ -42,11 +42,7 @@ allowed_origins = [
     'https://lbg-epc.esurv.co.uk'
 ]
 
-
-
 CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
-
-# Helper functions
 
 # Mock function - replace with DB call
 def get_addresses_from_db(postcode):
@@ -265,6 +261,16 @@ def submit_form():
                 api_call = 'surveyhub'
             else:
                 street_address = f"{address.get('building_name_number', '')} {address.get('street', '')}"
+                book_surveyhub_job(
+                    address.get('building_name_number', ''),
+                    address.get('street', ''),
+                    address.get('postcode', ''),
+                    first_name,
+                    last_name,
+                    email_address,
+                    phone_number,
+                    z_ref
+                )
                 book_ehouse_job(
                     street_address,
                     address.get('postcode', ''),
@@ -293,7 +299,6 @@ def submit_form():
             if PROD_STATUS == 'prod':
                 log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
             return jsonify({"error": str(e)}), 400
-
 
 
 # Route to serve custom static files from the main API folder
