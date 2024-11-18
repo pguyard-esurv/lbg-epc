@@ -1,8 +1,6 @@
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory, render_template, make_response
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 import os
 from functools import wraps
 import sentry_sdk
@@ -45,21 +43,6 @@ allowed_origins = [
 ]
 
 CORS(app, resources={r"/api/*": {"origins": allowed_origins}}, supports_credentials=True)
-
-app.config.update(
-    SQLALCHEMY_DATABASE_URI=app.config.get('DATABASE_URI'),
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-)
-
-# Initialize the database connection
-db = SQLAlchemy(app)
-
-# Enable Flask-Migrate commands "flask db init/migrate/upgrade" to work
-migrate = Migrate(app, db)
-
-# The import must be done after db initialization due to circular import issue
-from models import LBG_EPC_SUBMISSION
-# Helper functions
 
 # Mock function - replace with DB call
 def get_addresses_from_db(postcode):
