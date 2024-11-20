@@ -261,6 +261,14 @@ def submit_form():
                 api_call = 'surveyhub'
             else:
                 street_address = f"{address.get('building_name_number', '')} {address.get('street', '')}"
+                book_ehouse_job(
+                    street_address,
+                    address.get('postcode', ''),
+                    address.get('town', ''),
+                    full_name,
+                    email_address,
+                    phone_number
+                )
                 book_surveyhub_job(
                     address.get('building_name_number', ''),
                     address.get('street', ''),
@@ -270,14 +278,6 @@ def submit_form():
                     email_address,
                     phone_number,
                     z_ref
-                )
-                book_ehouse_job(
-                    street_address,
-                    address.get('postcode', ''),
-                    address.get('town', ''),
-                    full_name,
-                    email_address,
-                    phone_number
                 )
                 api_call = 'ehouse'
 

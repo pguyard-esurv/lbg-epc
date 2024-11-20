@@ -34,11 +34,11 @@ def get_ehouse_token():
     token = f'Bearer {token_response_dict["access_token"]}'
     return token
 
-def get_key_invoice_item_id():
+def get_key_invoice_item_id(ehouse_access_token):
 
     headers = {
         'Accept': 'application/json',
-        'Authorization': EHOUSE_ACCESS_TOKEN
+        'Authorization': ehouse_access_token
     }
 
     url = EHOUSE_API_BASE_URL + 'v2/KeyInvoiceItems'
@@ -90,7 +90,7 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
     ehouse_access_token = get_ehouse_token()
     
     try:
-        key_invoice_item_id = get_key_invoice_item_id()
+        key_invoice_item_id = get_key_invoice_item_id(ehouse_access_token)
     except Exception as e:
         sentry_sdk.capture_exception(e)
         key_invoice_item_id = EHOUSE_KEY_INVOICE_ITEM_ID
@@ -98,45 +98,4 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
     response = send_book_ehouse_job_request(street_address, postcode, town, name, email_address, phone_number, key_invoice_item_id, ehouse_access_token)
     
     if response.status_code != 200:
-        print('ehouse api request successfully sent')
-        raise Exception(response.json())
-    
-    if response.status_code != 200:
             raise Exception(response.json())
-
-
-EHOUSE_ACCESS_TOKEN = ''
-
-def get_ehouse_orders():
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': EHOUSE_ACCESS_TOKEN,
-    }
-
-    url = EHOUSE_API_BASE_URL + 'v2/Orders'
-
-    response = requests.get(url=url, headers=headers, verify=pem_file_path)
-    
-    return response
-
-def delete_ehouse_order(order_id):
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': EHOUSE_ACCESS_TOKEN,
-    }
-
-    url = EHOUSE_API_BASE_URL + 'v2/Orders/' + order_id
-
-    response = requests.delete(url=url, headers=headers, verify=pem_file_path)
-    
-    return response
-
-#'rowVersion': 2038904407, 'orderNumber': 8620495,
-
-def delete_all_ehouse_orders():
-    response = get_ehouse_orders()
-    response = json.loads(response.text)
-    print(f'there are {response["totalOrders"]} orders to delete')
-    order_list = response['orderList']
