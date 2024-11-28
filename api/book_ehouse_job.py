@@ -21,6 +21,8 @@ def get_ehouse_token():
     'Accept': 'application/json',
     }
     
+    print(EHOUSE_USERNAME)
+    
     data = {
         'grant_type': 'password',
         'username': EHOUSE_USERNAME,
@@ -99,3 +101,16 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
     
     if response.status_code != 200:
             raise Exception(response.json())
+
+
+"""
+
+street_address = 
+postcode =
+town =
+name =
+email_address = 
+phone_number = 
+
+book_ehouse_job(street_address, postcode, town, name, email_address, phone_number)
+"""

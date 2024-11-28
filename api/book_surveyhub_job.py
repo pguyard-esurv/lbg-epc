@@ -132,3 +132,17 @@ def sh_api_auth_test():
 
     response = requests.get(url=url, headers=headers)
     return response
+
+
+"""
+house_number = 
+street = 
+postcode = 
+first_name = 
+last_name =
+email_address = 
+phone_number =
+z_ref =
+
+book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number, z_ref)
+"""

@@ -298,7 +298,10 @@ def submit_form():
             complete = -1
             if PROD_STATUS == 'prod':
                 log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
-            return jsonify({"error": str(e)}), 400
+            response = jsonify({"message": "Form data received successfully"})
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response, 200
 
 
 # Route to serve custom static files from the main API folder
