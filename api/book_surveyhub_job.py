@@ -135,14 +135,16 @@ def sh_api_auth_test():
 
 
 """
-house_number = 
-street = 
-postcode = 
-first_name = 
-last_name =
-email_address = 
-phone_number =
-z_ref =
+
+
+house_number = ''
+street = ''
+postcode = ''
+first_name = ''
+last_name = ''
+email_address = ''
+phone_number = ''
+z_ref = ''
 
 book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number, z_ref)
 """

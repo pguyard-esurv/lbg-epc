@@ -36,6 +36,26 @@ def get_ehouse_token():
     token = f'Bearer {token_response_dict["access_token"]}'
     return token
 
+def test_get_ehouse_token():
+    
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Accept': 'application/json',
+    }
+    
+    print(EHOUSE_USERNAME)
+    
+    data = {
+        'grant_type': 'password',
+        'username': EHOUSE_USERNAME,
+        'password': EHOUSE_PASSWORD,
+    }
+    
+    url = EHOUSE_API_BASE_URL + 'token'
+
+    response = requests.post(url=url, headers=headers, data=data, verify=pem_file_path)
+    return response.text
+
 def get_key_invoice_item_id(ehouse_access_token):
 
     headers = {
@@ -68,9 +88,6 @@ def send_book_ehouse_job_request(street_address, postcode, town, name, email_add
                 "quantity": 1
             }
         ],
-        #"buildingNumber": "string",
-        #"buildingName": "string",
-        #"subBuilding": "string",
         "streetAddress": street_address, #required
         "town": town, #required
         "postcode": postcode, #required
@@ -103,14 +120,15 @@ def book_ehouse_job(street_address, postcode, town, name, email_address, phone_n
             raise Exception(response.json())
 
 
+
 """
 
-street_address = 
-postcode =
-town =
-name =
-email_address = 
-phone_number = 
+street_address = ''
+postcode = ''
+town =  ''
+name = ''
+email_address = ''
+phone_number = ''
 
 book_ehouse_job(street_address, postcode, town, name, email_address, phone_number)
 """
