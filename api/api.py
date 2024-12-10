@@ -303,15 +303,6 @@ def submit_form():
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             return response, 200
 
-if PROD_STATUS == 'dev':
-    from api.book_ehouse_job import test_get_ehouse_token
-else:
-    from book_ehouse_job import test_get_ehouse_token
-
-@app.route('/test-ehouse')
-def test_ehouse():
-    return test_get_ehouse_token()
-
 # Route to serve custom static files from the main API folder
 @app.route('/api-static/<path:filename>')
 def serve_api_static(filename):

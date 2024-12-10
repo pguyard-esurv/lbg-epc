@@ -36,26 +36,6 @@ def get_ehouse_token():
     token = f'Bearer {token_response_dict["access_token"]}'
     return token
 
-def test_get_ehouse_token():
-    
-    headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Accept': 'application/json',
-    }
-    
-    print(EHOUSE_USERNAME)
-    
-    data = {
-        'grant_type': 'password',
-        'username': EHOUSE_USERNAME,
-        'password': EHOUSE_PASSWORD,
-    }
-    
-    url = EHOUSE_API_BASE_URL + 'token'
-
-    response = requests.post(url=url, headers=headers, data=data, verify=pem_file_path)
-    return response.text
-
 def get_key_invoice_item_id(ehouse_access_token):
 
     headers = {
