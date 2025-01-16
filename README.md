@@ -4,7 +4,7 @@ This is a web app (Flask back end - React front end) which presents a form to LB
 
 The customer clicks on a link on an LBG site, which directs them to the back end of this web app. The back end verifies that the token which was passed with the request is valid via an API provided by LBG. After verification, it redirects the customer to the React app.
 
-The customer enters their information in the form and submits it. In order to enter their address, the customer first enters their postcode in a postcode search which then queries a separate esurv Postgres instance which returns all addresses associated with the postcode.
+The customer enters their information in the form and submits it.
 
 The customer is then presented with some terms to accept, which are different depending on whether the address is in Scotland or not.
 
@@ -68,7 +68,7 @@ To run psql, from DEV-RPALINUX-01 enter:
 psql "host=10.180.10.132 port=5432 dbname=postgres user=psqladmin"
 ```
 
-You will then be prompted for the password.
+You will then be prompted for the password. The password is located in the secret server under psql-lbgepc-prd-uks-01.
 
 The address and signature data can be quite large fields, so the following can be a useful query:
 
