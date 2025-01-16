@@ -55,6 +55,7 @@ Code snippets and more documentation (beta): https://documenter.getpostman.com/v
 Swagger: https://api.ehouse.co.uk/swagger/ui/index 
  
 You can also log into the ehouse portal, if you want to add/view orders manually while setting up: https://portal.ehouse.co.uk/
+The username and password for the portal are located on the secret server under ehouse Portal Username and Password
 
 # Secrets
 
