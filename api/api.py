@@ -79,10 +79,17 @@ def get_addresses_from_db(postcode):
     return mock_addresses
 
 def split_name(full_name):
-    parts = full_name.split(" ")
+    """Split full name into first_name and last_name"""
+    if not full_name or not full_name.strip():
+        return "Unknown", "Unknown"
+    
+    # Clean and split the name
+    parts = [part for part in full_name.strip().split() if part]
+    
     if len(parts) == 1:
-        return "", parts[0]
-    return " ".join(parts[:-1]), parts[-1]
+        return parts[0], "Unknown"
+    else:
+        return parts[0], " ".join(parts[1:])
 
 def token_required(f):
     @wraps(f)
