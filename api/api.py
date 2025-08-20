@@ -237,6 +237,7 @@ def submit_form():
         full_name, email_address, phone_number, address, api_call, signature = [''] * 6
         date = datetime.now()
         complete = -1
+        surveyhub_success = False
 
         try:
             # Parse JSON request data
@@ -255,7 +256,7 @@ def submit_form():
 
             # Process based on region
             if region == 'Scotland':
-                book_surveyhub_job(
+                response = book_surveyhub_job(
                     address.get('building_name_number', ''),
                     address.get('street', ''),
                     address.get('postcode', ''),
@@ -265,6 +266,7 @@ def submit_form():
                     phone_number,
                     z_ref
                 )
+                surveyhub_success = (response.status_code == 200)
                 api_call = 'surveyhub'
             else:
                 street_address = f"{address.get('building_name_number', '')} {address.get('street', '')}"
@@ -276,7 +278,7 @@ def submit_form():
                     email_address,
                     phone_number
                 )
-                book_surveyhub_job(
+                response = book_surveyhub_job(
                     address.get('building_name_number', ''),
                     address.get('street', ''),
                     address.get('postcode', ''),
@@ -286,10 +288,11 @@ def submit_form():
                     phone_number,
                     z_ref
                 )
+                surveyhub_success = (response.status_code == 200)
                 api_call = 'ehouse'
 
-            # Mark submission as complete and log in production
-            complete = 1
+            # Set complete status based on SurveyHub API success
+            complete = 1 if surveyhub_success else -1
             if PROD_STATUS == 'prod':
                 log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
 
@@ -302,7 +305,8 @@ def submit_form():
             # Handle exceptions, log errors, and return a response
             sentry_sdk.capture_exception(e)
             print(f"An error occurred: {e}")
-            complete = -1
+            # Even if other things fail, preserve API success status
+            complete = 1 if surveyhub_success else -1
             if PROD_STATUS == 'prod':
                 log_epc_submission(full_name, email_address, phone_number, address, api_call, signature, date, complete, z_ref)
             response = jsonify({"message": "Form data received successfully"})
