@@ -1,28 +1,45 @@
 import json
+import logging
 import os
+
 import requests
 from dotenv import load_dotenv
 
+from api.logging_config import get_logger
+
 load_dotenv()
-SH_API_KEY = os.getenv('SH_API_KEY')
-SH_API_BASE_URL = os.getenv('SH_API_BASE_URL')
-PROD_STATUS = os.getenv('PROD_STATUS')
+SH_API_KEY = os.getenv("SH_API_KEY")
+SH_API_BASE_URL = os.getenv("SH_API_BASE_URL")
+PROD_STATUS = os.getenv("PROD_STATUS")
 
-def book_surveyhub_job(house_number, street, postcode, first_name, last_name, email_address, phone_number, z_ref):
-    
-    url = SH_API_BASE_URL + 'api/job'
+# module logger using the RequestIdAdapter
+logger = get_logger(__name__)
 
-    try:    
+
+def book_surveyhub_job(
+    house_number,
+    street,
+    postcode,
+    first_name,
+    last_name,
+    email_address,
+    phone_number,
+    z_ref,
+):
+
+    url = SH_API_BASE_URL + "api/job"
+
+    try:
         headers = {
-            'Content-Type': 'application/json',
-            'X-API-KEY': SH_API_KEY,
+            "Content-Type": "application/json",
+            "X-API-KEY": SH_API_KEY,
         }
-        
-        if PROD_STATUS == 'dev':
+
+        if PROD_STATUS == "dev":
             instruction_ref = 999999
         else:
             instruction_ref = z_ref
-        
+
         data = {
             "instructionRef": instruction_ref,
             "CompanyName": "e.surv Chartered Surveyors",
@@ -35,7 +52,7 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
                     "buyToLet": False,
                     "payableByClient": True,
                     "payableByCustomer": False,
-                    "homeSurveySettings": None
+                    "homeSurveySettings": None,
                 }
             ],
             "address": {
@@ -48,15 +65,15 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
                 "dependentLocality": None,
                 "town": None,
                 "postcode": postcode,
-                "propertyType": 'unknown',
-                "detachmentType": 'unknown',
-                "propertyTenure": 'unknown',
-                "numberOfBedrooms": 0
+                "propertyType": "unknown",
+                "detachmentType": "unknown",
+                "propertyTenure": "unknown",
+                "numberOfBedrooms": 0,
             },
             "contacts": [
                 {
                     "id": "00000000-0000-0000-0000-000000000000",
-                    "salutation": 'unknown',
+                    "salutation": "unknown",
                     "firstName": first_name,
                     "lastName": last_name,
                     "emailAddress": email_address,
@@ -78,13 +95,13 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
                         {
                             "telephoneNumber": phone_number,
                             "isPrimary": True,
-                            "isMobile": True
+                            "isMobile": True,
                         }
-                    ]
+                    ],
                 },
             ],
             "appointmentDetails": None,
-            "estimatedValue":  0,
+            "estimatedValue": 0,
             "amountOfAdvance": 0.0,
             "vacantProperty": False,
             "newBuild": False,
@@ -93,7 +110,7 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
             "surveyorNotes": None,
             "overrideCustomerChargeNetFee": None,
             "overrideCustomerChargeVatAmount": None,
-            "termsAndConditionsUrl": None
+            "termsAndConditionsUrl": None,
         }
 
         json_data = json.dumps(data, indent=4)
@@ -103,32 +120,43 @@ def book_surveyhub_job(house_number, street, postcode, first_name, last_name, em
             headers=headers,
             data=json_data,
         )
-        
-        print(f'surveyhub api response {response.status_code}')
+
+        logger.info(
+            "surveyhub_response",
+            extra={
+                "status_code": getattr(response, "status_code", None),
+                "instruction_ref": instruction_ref,
+            },
+        )
 
         return response
 
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+        logger.exception(
+            "surveyhub_request_exception",
+            extra={"url": url, "instruction_ref": locals().get("instruction_ref")},
+        )
         return e
+
 
 def sh_api_test():
     headers = {
-    'accept': '*/*',
+        "accept": "*/*",
     }
-    
-    url = SH_API_BASE_URL + 'api/test'
+
+    url = SH_API_BASE_URL + "api/test"
 
     response = requests.get(url=url, headers=headers)
     return response
 
+
 def sh_api_auth_test():
     headers = {
-    'accept': '*/*',
-    'X-API-KEY': SH_API_KEY,
+        "accept": "*/*",
+        "X-API-KEY": SH_API_KEY,
     }
 
-    url = SH_API_BASE_URL + 'api/test/AuthTest'
+    url = SH_API_BASE_URL + "api/test/AuthTest"
 
     response = requests.get(url=url, headers=headers)
     return response
