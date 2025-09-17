@@ -3,7 +3,7 @@
 ###########
 
 # Build pip requirements.
-FROM python:3.9.7-slim-buster as build-reqs
+FROM python:3.9.7 AS build-reqs
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ RUN npm install && npm run build
 # FINAL #
 #########
 
-FROM python:3.9.7-slim-buster
+FROM python:3.9.7
 
 RUN mkdir /app
 WORKDIR /app

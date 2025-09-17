@@ -18,8 +18,7 @@ from flask import (
     send_from_directory,
 )
 from flask_cors import CORS
-
-from api.logging_config import get_logger
+from logging_config import get_logger
 
 # Use the LoggerAdapter so request_id is injected automatically into logs
 logger = get_logger(__name__)

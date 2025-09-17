@@ -5,7 +5,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from api.logging_config import get_logger
+from logging_config import get_logger
 
 load_dotenv()
 SH_API_KEY = os.getenv("SH_API_KEY")

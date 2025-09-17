@@ -5,7 +5,7 @@ import sys
 import psycopg2
 from dotenv import load_dotenv
 
-from api.logging_config import configure_root_logger, get_logger
+from logging_config import configure_root_logger, get_logger
 
 # Configure logging for this script
 configure_root_logger()

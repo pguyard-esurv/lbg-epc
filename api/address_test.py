@@ -1,6 +1,6 @@
 from esurv_db_manager import SH_DB
 
-from api.logging_config import configure_root_logger, get_logger
+from logging_config import configure_root_logger, get_logger
 
 configure_root_logger()
 logger = get_logger(__name__)
